@@ -1,17 +1,22 @@
-const express = require('express');
-const http = require('http');
-const { Server } = require('socket.io');
-const cors = require('cors');
-require('dotenv').config();
+import express from 'express';
+import http from 'http';
+import { Server } from 'socket.io';
+import cors from 'cors';
+import dotenv from 'dotenv';
+import twilio from 'twilio';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-const twilio = require('twilio');
-const path = require('path');
+dotenv.config();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 const server = http.createServer(app);
 
 // Configuration Twilio
-const twilioClient = new twilio(
+const twilioClient = twilio(
     process.env.TWILIO_ACCOUNT_SID,
     process.env.TWILIO_AUTH_TOKEN
 );
@@ -26,48 +31,33 @@ const io = new Server(server, {
 app.use(cors());
 app.use(express.json());
 
-// --- Simulation de Base de Données (À remplacer par MongoDB/PostgreSQL) ---
+// --- Simulation de Base de Données ---
 let queue = [];
-// --------------------------------------------------------------------------
 
 // --- ROUTES API ---
-// Route pour rejoindre la file d'attente
 app.post('/api/queue/join', (req, res) => {
     const { phone } = req.body;
-
     if (!phone) return res.status(400).json({ error: "Numéro de téléphone requis" });
-
     const newUser = { id: Date.now().toString(), phone, status: 'waiting', timestamp: new Date().toISOString() };
-
     queue.push(newUser);
-
-    // Informer tout le monde qu'un nouveau client est arrivé
     io.emit('queue_updated', queue);
-
     res.status(201).json(newUser);
 });
 
-// Route pour récupérer la file
 app.get('/api/queue', (req, res) => res.json(queue));
 
-// Route pour appeler le prochain client
 app.post('/api/queue/call', async (req, res) => {
     const nextWaitingIndex = queue.findIndex(q => q.status === 'waiting');
-
     if (nextWaitingIndex === -1) return res.status(404).json({ error: "Aucun client en attente" });
 
     queue[nextWaitingIndex].status = 'called';
     queue[nextWaitingIndex].calledAt = new Date().toISOString();
     const calledUser = queue[nextWaitingIndex];
 
-    // Socket: Notifier en temps réel sur le site
     io.emit('client_called', calledUser);
     io.emit('queue_updated', queue);
 
-    // LOGIQUE SMS TWILIO
     let formattedPhone = calledUser.phone.trim();
-
-    // Si le numéro commence par 0, on remplace par +33 pour la France
     if (formattedPhone.startsWith('0')) formattedPhone = '+33' + formattedPhone.substring(1);
 
     try {
@@ -80,11 +70,9 @@ app.post('/api/queue/call', async (req, res) => {
     } catch (error) {
         console.error("❌ Erreur Twilio:", error.message);
     }
-
     res.json(calledUser);
 });
 
-// Route pour réinitialiser la file
 app.post('/api/queue/reset', (req, res) => {
     queue = [];
     io.emit('queue_updated', queue);
@@ -92,8 +80,6 @@ app.post('/api/queue/reset', (req, res) => {
 });
 
 // --- SERVICE DES FICHIERS FRONTEND ---
-// Sur Vercel, les fichiers statiques sont gérés par le déploiement frontend, 
-// on ne les sert ici que si on est en local hors Vercel.
 if (process.env.NODE_ENV === 'production' && !process.env.VERCEL) {
     app.use(express.static(path.join(__dirname, '../dist')));
     app.get('*', (req, res) => {
@@ -102,7 +88,7 @@ if (process.env.NODE_ENV === 'production' && !process.env.VERCEL) {
 }
 
 // Pour Vercel : Exposer l'application Express
-module.exports = app;
+export default app;
 
 // Ne lancer le listen que si on n'est pas sur Vercel
 if (!process.env.VERCEL) {
