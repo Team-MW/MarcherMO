@@ -1,58 +1,86 @@
 import { createContext, useContext, useState, useEffect } from 'react';
+import { io } from 'socket.io-client';
+import axios from 'axios';
 
 const QueueContext = createContext();
 
-export const QueueProvider = ({ children }) => {
-  const [queue, setQueue] = useState(() => {
-    const saved = localStorage.getItem('marchemo_queue');
-    return saved ? JSON.parse(saved) : [];
-  });
+// En local, utilisez http://localhost:3001
+// En production, remplacez par l'URL de votre serveur déployé (Render, Railway, Heroku, etc.)
+const SOCKET_URL = 'http://localhost:3001';
+const API_URL = 'http://localhost:3001/api';
 
+const socket = io(SOCKET_URL);
+
+export const QueueProvider = ({ children }) => {
+  const [queue, setQueue] = useState([]);
   const [currentUser, setCurrentUser] = useState(() => {
     const saved = localStorage.getItem('marchemo_current_user');
     return saved ? JSON.parse(saved) : null;
   });
 
+  // Charger la file initiale et écouter les mises à jour
   useEffect(() => {
-    localStorage.setItem('marchemo_queue', JSON.stringify(queue));
-  }, [queue]);
+    const fetchQueue = async () => {
+      try {
+        const res = await axios.get(`${API_URL}/queue`);
+        setQueue(res.data);
+      } catch (err) {
+        console.error("Erreur chargement file:", err);
+      }
+    };
 
-  useEffect(() => {
-    localStorage.setItem('marchemo_current_user', JSON.stringify(currentUser));
+    fetchQueue();
+
+    socket.on('queue_updated', (updatedQueue) => {
+      setQueue(updatedQueue);
+    });
+
+    socket.on('client_called', (calledUser) => {
+      // Si c'est nous qui sommes appelés, on met à jour notre état local
+      if (currentUser && calledUser.id === currentUser.id) {
+        setCurrentUser(prev => ({ ...prev, status: 'called' }));
+      }
+    });
+
+    return () => {
+      socket.off('queue_updated');
+      socket.off('client_called');
+    };
   }, [currentUser]);
 
-  const joinQueue = (phone) => {
-    const newUser = {
-      id: Date.now().toString(),
-      phone,
-      status: 'waiting', // waiting, called
-      timestamp: new Date().toISOString(),
-      position: queue.filter(q => q.status === 'waiting').length + 1
-    };
-    setQueue([...queue, newUser]);
-    setCurrentUser(newUser);
-    return newUser;
+  useEffect(() => {
+    if (currentUser) {
+      localStorage.setItem('marchemo_current_user', JSON.stringify(currentUser));
+    }
+  }, [currentUser]);
+
+  const joinQueue = async (phone) => {
+    try {
+      const res = await axios.post(`${API_URL}/queue/join`, { phone });
+      setCurrentUser(res.data);
+      return res.data;
+    } catch (err) {
+      console.error("Erreur joinQueue:", err);
+    }
   };
 
-  const callNext = () => {
-    const nextWaiting = queue.find(q => q.status === 'waiting');
-    if (!nextWaiting) return null;
-
-    const updatedQueue = queue.map(q => 
-      q.id === nextWaiting.id ? { ...q, status: 'called' } : q
-    );
-    setQueue(updatedQueue);
-
-    // Simulate notification
-    console.log(`Notification sent to ${nextWaiting.phone}: C'est votre tour !`);
-    
-    // In a real app, you'd trigger a push or SMS here
-    return nextWaiting;
+  const callNext = async () => {
+    try {
+      const res = await axios.post(`${API_URL}/queue/call`);
+      return res.data;
+    } catch (err) {
+      console.error("Erreur callNext:", err);
+    }
   };
 
-  const resetQueue = () => {
-    setQueue([]);
-    setCurrentUser(null);
+  const resetQueue = async () => {
+    try {
+      await axios.post(`${API_URL}/queue/reset`);
+      setCurrentUser(null);
+      localStorage.removeItem('marchemo_current_user');
+    } catch (err) {
+      console.error("Erreur resetQueue:", err);
+    }
   };
 
   return (
