@@ -92,15 +92,22 @@ app.post('/api/queue/reset', (req, res) => {
 });
 
 // --- SERVICE DES FICHIERS FRONTEND ---
-// En production, on sert le dossier 'dist'
-if (process.env.NODE_ENV === 'production') {
-    app.use(express.static(path.join(__dirname, 'dist')));
+// Sur Vercel, les fichiers statiques sont gérés par le déploiement frontend, 
+// on ne les sert ici que si on est en local hors Vercel.
+if (process.env.NODE_ENV === 'production' && !process.env.VERCEL) {
+    app.use(express.static(path.join(__dirname, '../dist')));
     app.get('*', (req, res) => {
-        res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+        res.sendFile(path.join(__dirname, '../dist', 'index.html'));
     });
 }
 
-const PORT = process.env.PORT || 3001;
-server.listen(PORT, () => {
-    console.log(`🚀 Serveur Marché MO (Front + Back) en ligne sur le port ${PORT}`);
-});
+// Pour Vercel : Exposer l'application Express
+module.exports = app;
+
+// Ne lancer le listen que si on n'est pas sur Vercel
+if (!process.env.VERCEL) {
+    const PORT = process.env.PORT || 3001;
+    server.listen(PORT, () => {
+        console.log(`🚀 Serveur local en ligne sur le port ${PORT}`);
+    });
+}
