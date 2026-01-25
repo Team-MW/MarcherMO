@@ -44,6 +44,13 @@ const views = [
         path: "/analytics",
         icon: <BarChart3 size={32} />,
         color: "#D4AF37"
+    },
+    {
+        title: "Score Boutique",
+        desc: "Affichage géant du numéro appelé",
+        path: "/score",
+        icon: <Navigation size={32} />,
+        color: "#16a34a"
     }
 ];
 

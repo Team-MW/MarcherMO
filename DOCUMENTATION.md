@@ -26,13 +26,6 @@ Le projet est désormais unifié : le **Frontend** et le **Backend** partagent l
 
 Render est idéal car il permet d'héberger le front et le back sur une seule URL avec support complet de Socket.io (temps réel).
 
-### Étape 1 : Push sur GitHub
-```bash
-git add .
-git commit -m "Fusion Front + Back pour déploiement"
-git push origin main
-```
-
 ### Étape 2 : Créer le service sur Render
 1.  Nouveau **Web Service**.
 2.  Connectez votre dépôt GitHub.
@@ -52,3 +45,4 @@ git push origin main
 - **Accueil / Dashboard Central :** `/vue`
 - **Borne QR Code :** `/qr`
 - **Admin Boucher :** `/admin` (Code: `000000`)
+

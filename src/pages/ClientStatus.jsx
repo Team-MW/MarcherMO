@@ -50,6 +50,10 @@ export default function ClientStatus() {
                             marginBottom: '2rem',
                             border: '1px solid #f0f0f0'
                         }}>
+                            <p style={{ textTransform: 'uppercase', letterSpacing: '0.1em', fontSize: '0.8rem', fontWeight: 700, color: 'var(--text)', marginBottom: '1rem' }}>
+                                Votre Ticket : <span style={{ color: 'var(--primary)', fontSize: '1.2rem' }}>{myQueueInfo?.ticketNumber}</span>
+                            </p>
+                            <hr style={{ border: 'none', borderTop: '1px solid #eee', marginBottom: '1rem' }} />
                             <p style={{ textTransform: 'uppercase', letterSpacing: '0.1em', fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-light)', marginBottom: '0.5rem' }}>
                                 Position actuelle
                             </p>
@@ -66,9 +70,27 @@ export default function ClientStatus() {
                             </p>
                         </div>
 
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', color: 'var(--text-light)', fontSize: '0.9rem' }}>
-                            <div className="pulse-dot" />
-                            Actualisation en temps réel
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.5rem', marginTop: '2rem' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', color: 'var(--text-light)', fontSize: '0.9rem' }}>
+                                <div className="pulse-dot" />
+                                Actualisation en temps réel
+                            </div>
+
+                            <div style={{
+                                background: 'rgba(212, 175, 55, 0.1)',
+                                padding: '1.5rem',
+                                borderRadius: '16px',
+                                border: '1px solid rgba(212, 175, 55, 0.3)',
+                                maxWidth: '500px',
+                                textAlign: 'center'
+                            }}>
+                                <p style={{ margin: 0, color: 'var(--text)', fontSize: '1rem', fontWeight: 600 }}>
+                                    📱 <strong>Vous recevrez un SMS</strong> dès que ce sera votre tour !
+                                </p>
+                                <p style={{ margin: '0.5rem 0 0 0', color: 'var(--text-light)', fontSize: '0.9rem' }}>
+                                    Vous pouvez fermer cette page en toute tranquillité.
+                                </p>
+                            </div>
                         </div>
                     </motion.div>
                 ) : (

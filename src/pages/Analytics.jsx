@@ -6,18 +6,39 @@ import {
     AreaChart, Area
 } from 'recharts';
 import {
-    Users, Clock, Download, TrendingUp, Calendar, ArrowLeft, FileSpreadsheet
+    Users, Clock, Download, TrendingUp, Calendar, ArrowLeft, FileSpreadsheet, Filter
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import * as XLSX from 'xlsx';
 
 export default function Analytics() {
     const { queue } = useQueue();
+    const [filterRange, setFilterRange] = useState('all'); // 'today', '7d', '30d', 'all'
 
-    // 1. Calcul des statistiques
+    // 1. Filtrage des données
+    const filteredQueue = useMemo(() => {
+        const now = new Date();
+        return queue.filter(q => {
+            const clientDate = new Date(q.timestamp);
+            if (filterRange === 'today') {
+                return clientDate.toDateString() === now.toDateString();
+            } else if (filterRange === '7d') {
+                const sevenDaysAgo = new Date();
+                sevenDaysAgo.setDate(now.getDate() - 7);
+                return clientDate >= sevenDaysAgo;
+            } else if (filterRange === '30d') {
+                const thirtyDaysAgo = new Date();
+                thirtyDaysAgo.setDate(now.getDate() - 30);
+                return clientDate >= thirtyDaysAgo;
+            }
+            return true; // 'all'
+        });
+    }, [queue, filterRange]);
+
+    // 2. Calcul des statistiques sur les données filtrées
     const stats = useMemo(() => {
-        const total = queue.length;
-        const called = queue.filter(q => q.status === 'called');
+        const total = filteredQueue.length;
+        const called = filteredQueue.filter(q => q.status === 'called');
 
         // Temps d'attente moyen (en minutes)
         let avgWait = 0;
@@ -30,19 +51,19 @@ export default function Analytics() {
             avgWait = Math.round(totalWait / called.length / 60000);
         }
 
-        // Données pour le graphique par heure
+        // Données pour le graphique par heure (basé sur toutes les données filtrées)
         const hoursData = Array.from({ length: 24 }, (_, i) => ({ hour: `${i}h`, clients: 0 }));
-        queue.forEach(q => {
+        filteredQueue.forEach(q => {
             const hour = new Date(q.timestamp).getHours();
             hoursData[hour].clients += 1;
         });
 
         return { total, calledCount: called.length, avgWait, hoursData };
-    }, [queue]);
+    }, [filteredQueue]);
 
-    // 2. Export Excel
+    // 3. Export Excel (Données filtrées)
     const exportToExcel = () => {
-        const dataToExport = queue.map(q => ({
+        const dataToExport = filteredQueue.map(q => ({
             ID: q.id,
             Telephone: q.phone,
             Statut: q.status === 'called' ? 'Appelé' : 'En attente',
@@ -53,21 +74,54 @@ export default function Analytics() {
         const ws = XLSX.utils.json_to_sheet(dataToExport);
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, "Clients");
-        XLSX.writeFile(wb, `marche_mo_clients_${new Date().toLocaleDateString()}.xlsx`);
+        XLSX.writeFile(wb, `marche_mo_stats_${filterRange}_${new Date().toLocaleDateString()}.xlsx`);
     };
+
+    const filterOptions = [
+        { id: 'today', label: "Aujourd'hui" },
+        { id: '7d', label: "7 derniers jours" },
+        { id: '30d', label: "30 derniers jours" },
+        { id: 'all', label: "Tout" },
+    ];
 
     return (
         <div className="container" style={{ maxWidth: '1200px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1.5rem' }}>
                 <div>
                     <Link to="/admin" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--primary)', textDecoration: 'none', marginBottom: '0.5rem', fontWeight: 600 }}>
                         <ArrowLeft size={18} /> Retour Admin
                     </Link>
                     <h1 style={{ margin: 0 }}>Statistiques & Analyses</h1>
                 </div>
-                <button onClick={exportToExcel} className="btn btn-secondary" style={{ gap: '0.8rem' }}>
-                    <FileSpreadsheet size={20} /> Exporter en Excel
-                </button>
+
+                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                    {/* Filtres Select Style */}
+                    <div style={{ background: '#f8f9fa', padding: '0.5rem', borderRadius: '16px', display: 'flex', gap: '0.25rem', border: '1px solid #eee' }}>
+                        {filterOptions.map(opt => (
+                            <button
+                                key={opt.id}
+                                onClick={() => setFilterRange(opt.id)}
+                                style={{
+                                    padding: '0.6rem 1.2rem',
+                                    borderRadius: '12px',
+                                    border: 'none',
+                                    cursor: 'pointer',
+                                    fontSize: '0.9rem',
+                                    fontWeight: 600,
+                                    background: filterRange === opt.id ? 'var(--text)' : 'transparent',
+                                    color: filterRange === opt.id ? 'white' : 'var(--text-light)',
+                                    transition: 'all 0.3s'
+                                }}
+                            >
+                                {opt.label}
+                            </button>
+                        ))}
+                    </div>
+
+                    <button onClick={exportToExcel} className="btn btn-secondary" style={{ gap: '0.8rem', padding: '0.8rem 1.5rem' }}>
+                        <FileSpreadsheet size={20} /> Exporter
+                    </button>
+                </div>
             </div>
 
             {/* Cartes Stats */}
@@ -112,8 +166,12 @@ export default function Analytics() {
             {/* Graphiques */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '2rem' }}>
                 <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="glass-card" style={{ padding: '2rem' }}>
-                    <h3 style={{ marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <Calendar size={24} /> Affluence par Heure
+                    <h3 style={{ marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                        <Calendar size={24} />
+                        Affluence par Heure
+                        <span style={{ fontSize: '0.9rem', fontWeight: 400, background: '#eee', padding: '0.2rem 0.8rem', borderRadius: '20px', color: '#666' }}>
+                            {filterOptions.find(o => o.id === filterRange).label}
+                        </span>
                     </h3>
                     <div style={{ height: '350px', width: '100%' }}>
                         <ResponsiveContainer width="100%" height="100%">

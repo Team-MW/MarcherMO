@@ -38,7 +38,18 @@ let queue = [];
 app.post('/api/queue/join', (req, res) => {
     const { phone } = req.body;
     if (!phone) return res.status(400).json({ error: "Numéro de téléphone requis" });
-    const newUser = { id: Date.now().toString(), phone, status: 'waiting', timestamp: new Date().toISOString() };
+
+    // Générer un numéro de ticket (ex: #0001)
+    const ticketNumber = (queue.length + 1).toString().padStart(4, '0');
+
+    const newUser = {
+        id: Date.now().toString(),
+        phone,
+        status: 'waiting',
+        timestamp: new Date().toISOString(),
+        ticketNumber: `#${ticketNumber}`
+    };
+
     queue.push(newUser);
     io.emit('queue_updated', queue);
     res.status(201).json(newUser);
@@ -62,7 +73,7 @@ app.post('/api/queue/call', async (req, res) => {
 
     try {
         await twilioClient.messages.create({
-            body: "C'est votre tour au Marché MO ! Veuillez vous présenter au comptoir.",
+            body: `C'est votre tour au Marché MO ! (Ticket ${calledUser.ticketNumber}). Veuillez vous présenter au comptoir.`,
             messagingServiceSid: process.env.TWILIO_MESSAGING_SERVICE_SID,
             to: formattedPhone
         });

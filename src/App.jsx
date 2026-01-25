@@ -7,6 +7,7 @@ import DisplayQR from './pages/DisplayQR';
 import Analytics from './pages/Analytics';
 import AdminLogin from './pages/AdminLogin';
 import Sitemap from './pages/Sitemap';
+import ScoreDisplay from './pages/ScoreDisplay';
 import { useState } from 'react';
 import './index.css';
 
@@ -21,6 +22,7 @@ function App() {
         <Routes>
           {/* Dashboard Central */}
           <Route path="/vue" element={<Sitemap />} />
+          <Route path="/score" element={<ScoreDisplay />} />
 
           {/* QR & Stats */}
           <Route path="/qr" element={<DisplayQR />} />

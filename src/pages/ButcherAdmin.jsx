@@ -70,7 +70,7 @@ export default function ButcherAdmin() {
                                         }}
                                     >
                                         <div>
-                                            <div style={{ fontWeight: 600 }}>Client #{client.id.slice(-4)}</div>
+                                            <div style={{ fontWeight: 800, color: 'var(--primary)', fontSize: '1.2rem' }}>{client.ticketNumber || `#${client.id.slice(-4)}`}</div>
                                             <div style={{ fontSize: '0.9rem', color: 'var(--text-light)', display: 'flex', alignItems: 'center', gap: '4px' }}>
                                                 <Phone size={12} /> {client.phone}
                                             </div>
@@ -106,8 +106,11 @@ export default function ButcherAdmin() {
                                     }}
                                 >
                                     <div>
-                                        <div style={{ fontWeight: 600 }}>Client #{client.id.slice(-4)}</div>
-                                        <div style={{ fontSize: '0.9rem', color: 'var(--text-light)' }}>{client.phone}</div>
+                                        <div style={{ fontWeight: 800, color: 'var(--text-light)', fontSize: '1.1rem' }}>{client.ticketNumber || `#${client.id.slice(-4)}`}</div>
+                                        <div style={{ fontSize: '0.9rem', color: 'var(--text-light)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                            <Phone size={12} /> {client.phone}
+                                        </div>
+                                        {client.timestamp && <div style={{ fontSize: '0.8rem', color: 'var(--text-light)' }}>Appelé à {new Date(client.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>}
                                     </div>
                                     <div className="badge badge-called">Appelé</div>
                                 </motion.div>
