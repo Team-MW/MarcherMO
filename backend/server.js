@@ -4,8 +4,17 @@ const { Server } = require('socket.io');
 const cors = require('cors');
 require('dotenv').config();
 
+const twilio = require('twilio');
+
 const app = express();
 const server = http.createServer(app);
+
+// Configuration Twilio
+const twilioClient = new twilio(
+    process.env.TWILIO_ACCOUNT_SID,
+    process.env.TWILIO_AUTH_TOKEN
+);
+
 const io = new Server(server, {
     cors: {
         origin: "*", // En production, mettez l'URL de votre front Vercel
@@ -47,7 +56,7 @@ app.get('/api/queue', (req, res) => {
 });
 
 // Route pour appeler le prochain client
-app.post('/api/queue/call', (req, res) => {
+app.post('/api/queue/call', async (req, res) => {
     const nextWaitingIndex = queue.findIndex(q => q.status === 'waiting');
 
     if (nextWaitingIndex === -1) {
@@ -55,14 +64,35 @@ app.post('/api/queue/call', (req, res) => {
     }
 
     queue[nextWaitingIndex].status = 'called';
+    queue[nextWaitingIndex].calledAt = new Date().toISOString();
     const calledUser = queue[nextWaitingIndex];
 
-    // Socket: Notifier spécifiquement ce client ou rafraîchir tout le monde
+    // Socket: Notifier en temps réel sur le site
     io.emit('client_called', calledUser);
     io.emit('queue_updated', queue);
 
-    // ICI : Logique d'envoi de SMS (SMSmode par exemple)
-    console.log(`SIMULATION SMS -> ${calledUser.phone} : C'est votre tour au Marché MO !`);
+    // LOGIQUE SMS TWILIO
+    let formattedPhone = calledUser.phone.trim();
+
+    // Si le numéro commence par 0, on remplace par +33 pour la France
+    if (formattedPhone.startsWith('0')) {
+        formattedPhone = '+33' + formattedPhone.substring(1);
+    }
+
+    try {
+        await twilioClient.messages.create({
+            body: "C'est votre tour au Marché MO ! Veuillez vous présenter au comptoir.",
+            messagingServiceSid: process.env.TWILIO_MESSAGING_SERVICE_SID,
+            to: formattedPhone
+        });
+        console.log(`✅ SMS envoyé avec succès via Messaging Service à ${formattedPhone}`);
+    } catch (error) {
+        console.error("❌ Erreur Twilio détaillée :");
+        console.error(" - Code :", error.code);
+        console.error(" - Message :", error.message);
+        console.error(" - Service SID utilisé :", process.env.TWILIO_MESSAGING_SERVICE_SID);
+        console.error(" - Destinataire tenté :", formattedPhone);
+    }
 
     res.json(calledUser);
 });

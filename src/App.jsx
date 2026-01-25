@@ -4,22 +4,40 @@ import ClientHome from './pages/ClientHome';
 import ClientStatus from './pages/ClientStatus';
 import ButcherAdmin from './pages/ButcherAdmin';
 import DisplayQR from './pages/DisplayQR';
+import Analytics from './pages/Analytics';
+import AdminLogin from './pages/AdminLogin';
+import Sitemap from './pages/Sitemap';
+import { useState } from 'react';
 import './index.css';
 
 function App() {
+  const [isAdmin, setIsAdmin] = useState(localStorage.getItem('admin_auth') === 'true');
+
+  const handleAdminLogin = () => setIsAdmin(true);
+
   return (
     <QueueProvider>
       <Router>
         <Routes>
-          {/* QR Display */}
+          {/* Dashboard Central */}
+          <Route path="/vue" element={<Sitemap />} />
+
+          {/* QR & Stats */}
           <Route path="/qr" element={<DisplayQR />} />
+          <Route
+            path="/analytics"
+            element={isAdmin ? <Analytics /> : <AdminLogin onLogin={handleAdminLogin} />}
+          />
 
           {/* Client Routes */}
           <Route path="/" element={<ClientHome />} />
           <Route path="/status" element={<ClientStatus />} />
 
           {/* Butcher Routes */}
-          <Route path="/admin" element={<ButcherAdmin />} />
+          <Route
+            path="/admin"
+            element={isAdmin ? <ButcherAdmin /> : <AdminLogin onLogin={handleAdminLogin} />}
+          />
 
           {/* Fallback */}
           <Route path="*" element={<Navigate to="/" replace />} />

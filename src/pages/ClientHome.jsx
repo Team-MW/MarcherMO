@@ -5,13 +5,24 @@ import { motion } from 'framer-motion';
 import { Phone, ArrowRight } from 'lucide-react';
 
 export default function ClientHome() {
-    const [phone, setPhone] = useState('');
+    const [phone, setPhone] = useState('+33');
     const { joinQueue } = useQueue();
     const navigate = useNavigate();
 
+    const handlePhoneChange = (e) => {
+        let value = e.target.value;
+        // Empêcher la suppression du +33
+        if (!value.startsWith('+33')) {
+            value = '+33' + value.replace(/^\+?3?3?/, '');
+        }
+        // Garder seulement les chiffres après le +
+        const digits = value.slice(1).replace(/\D/g, '');
+        setPhone('+' + digits);
+    };
+
     const handleSubmit = (e) => {
         e.preventDefault();
-        if (phone.length < 10) return;
+        if (phone.length < 12) return; // +33 + 9 chiffres minimum
         joinQueue(phone);
         navigate('/status');
     };
@@ -36,9 +47,9 @@ export default function ClientHome() {
                             <input
                                 id="phone"
                                 type="tel"
-                                placeholder="06 12 34 56 78"
+                                placeholder="+33 6 12 34 56 78"
                                 value={phone}
-                                onChange={(e) => setPhone(e.target.value)}
+                                onChange={handlePhoneChange}
                                 style={{ paddingLeft: '2.8rem' }}
                                 required
                             />

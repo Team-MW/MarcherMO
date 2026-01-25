@@ -1,6 +1,7 @@
 import { useQueue } from '../context/QueueContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Users, UserCheck, Play, RotateCcw, Phone } from 'lucide-react';
+import { Users, UserCheck, Play, RotateCcw, Phone, BarChart3 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 export default function ButcherAdmin() {
     const { queue, callNext, resetQueue } = useQueue();
@@ -8,16 +9,29 @@ export default function ButcherAdmin() {
     const waitingList = queue.filter(q => q.status === 'waiting');
     const calledList = queue.filter(q => q.status === 'called').reverse();
 
+    const handleLogout = () => {
+        localStorage.removeItem('admin_auth');
+        window.location.reload();
+    };
+
     return (
         <div className="container" style={{ maxWidth: '1000px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
                 <h1>Tableau de Bord Boucher</h1>
-                <button onClick={resetQueue} className="btn" style={{ background: '#fee2e2', color: '#991b1b' }}>
-                    <RotateCcw size={18} /> Réinitialiser
-                </button>
+                <div style={{ display: 'flex', gap: '1rem' }}>
+                    <Link to="/analytics" className="btn btn-secondary" style={{ textDecoration: 'none' }}>
+                        <BarChart3 size={18} /> Statistiques
+                    </Link>
+                    <button onClick={handleLogout} className="btn" style={{ background: '#eee', color: '#666' }}>
+                        Déconnexion
+                    </button>
+                    <button onClick={resetQueue} className="btn" style={{ background: '#fee2e2', color: '#991b1b' }}>
+                        <RotateCcw size={18} /> Réinitialiser
+                    </button>
+                </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+            <div className="admin-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
                 {/* Left: Action & Waiting List */}
                 <div>
                     <div className="glass-card" style={{ marginBottom: '2rem', textAlign: 'center' }}>
