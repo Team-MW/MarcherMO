@@ -6,7 +6,7 @@ export default function AdminLogin({ onLogin }) {
     const [code, setCode] = useState('');
     const [error, setError] = useState(false);
 
-    const correctCode = '767637';
+    const correctCode = '000000';
 
     const handleSubmit = (e) => {
         e.preventDefault();

@@ -4,12 +4,12 @@ import axios from 'axios';
 
 const QueueContext = createContext();
 
-// En local, utilisez http://localhost:3001
-// En production, remplacez par l'URL de votre serveur déployé (Render, Railway, Heroku, etc.)
-const SOCKET_URL = 'http://localhost:3001';
-const API_URL = 'http://localhost:3001/api';
+// Détection dynamique de l'URL du serveur
+const isLocal = window.location.hostname === 'localhost';
+const BASE_URL = isLocal ? 'http://localhost:3001' : window.location.origin;
 
-const socket = io(SOCKET_URL);
+const socket = io(BASE_URL);
+const API_URL = `${BASE_URL}/api`;
 
 export const QueueProvider = ({ children }) => {
   const [queue, setQueue] = useState([]);
