@@ -14,7 +14,7 @@ Cochez les étapes au fur et à mesure de votre progression.
 
 ---
 
-## 🗄️ Phase 2 : Configuration PlanetScale
+## 🗄️ P. hase 2 : Configuration PlanetScale
 
 - [ ] Base de données créée sur PlanetScale (nom: `marche-mo`)
 - [ ] Connection string récupérée
