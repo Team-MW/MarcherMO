@@ -10,8 +10,16 @@ const BASE_URL = isLocal
   ? 'http://localhost:3001'                    // Développement local
   : 'https://marchermo.onrender.com';          // Production : Backend sur Render
 
-const socket = io(BASE_URL);
+// Configuration Socket.IO robuste
+const socket = io(BASE_URL, {
+  transports: ['polling', 'websocket'], // Essayer polling d'abord pour compatibilité max
+  withCredentials: true,
+  reconnection: true,
+  reconnectionAttempts: 10,
+  reconnectionDelay: 1000,
+});
 const API_URL = `${BASE_URL}/api`;
+
 
 export const QueueProvider = ({ children }) => {
   const [queue, setQueue] = useState([]);
