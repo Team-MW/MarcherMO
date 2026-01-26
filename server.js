@@ -41,6 +41,7 @@ app.use(express.json());
  * Ajouter un client à la file d'attente
  */
 app.post('/api/queue/join', async (req, res) => {
+    console.log('[API] Join request received:', req.body);
     try {
         const { phone } = req.body;
 
@@ -98,11 +99,14 @@ app.get('/api/queue', async (req, res) => {
  * Appeler le prochain client en attente
  */
 app.post('/api/queue/call', async (req, res) => {
+    console.log('[API] Call next client requested');
     try {
         // Appeler le prochain client
         const calledClient = await db.callNextClient();
+        console.log('[API] Called client result:', calledClient);
 
         if (!calledClient) {
+            console.log('[API] No client to call (queue empty or error)');
             return res.status(404).json({ error: "Aucun client en attente" });
         }
 
@@ -175,8 +179,11 @@ app.post('/api/queue/call', async (req, res) => {
  * Réinitialiser la file d'attente (annuler tous les clients en attente)
  */
 app.post('/api/queue/reset', async (req, res) => {
+    console.log('⚠️ [API] Reset queue requested!');
     try {
         const affectedRows = await db.resetQueue();
+        console.log(`⚠️ [API] Queue reset! ${affectedRows} clients cancelled.`);
+
 
         // Émettre la mise à jour
         const queue = await db.getQueue();
