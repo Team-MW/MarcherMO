@@ -2,25 +2,60 @@ import { useQueue } from '../context/QueueContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { Bell } from 'lucide-react';
+import axios from 'axios';
+import { io } from 'socket.io-client';
 
 export default function ScoreDisplay() {
-    const { queue } = useQueue();
     const [lastCalled, setLastCalled] = useState(null);
     const [isNewCall, setIsNewCall] = useState(false);
 
+    // Charger le dernier appelé au démarrage
     useEffect(() => {
-        const called = queue.filter(q => q.status === 'called');
-        if (called.length > 0) {
-            const latest = called[called.length - 1]; // Dans le context, ils sont ajoutés à la fin
-            if (lastCalled?.id !== latest.id) {
-                setLastCalled(latest);
-                setIsNewCall(true);
-                // Jouer un petit son si vous voulez, ou juste l'animation
-                const timer = setTimeout(() => setIsNewCall(false), 5000);
-                return () => clearTimeout(timer);
+        const fetchLastCalled = async () => {
+            try {
+                const isLocal = window.location.hostname === 'localhost';
+                const BASE_URL = isLocal ? 'http://localhost:3001' : 'https://marchermo.onrender.com';
+                const response = await axios.get(`${BASE_URL}/api/history?filter=today`);
+
+                // Prendre le plus récent des "called"
+                const called = response.data.filter(q => q.status === 'called');
+                if (called.length > 0) {
+                    // Trier par date d'appel (le plus récent en dernier)
+                    called.sort((a, b) => {
+                        const dateA = a.called_at || a.calledAt || a.timestamp;
+                        const dateB = b.called_at || b.calledAt || b.timestamp;
+                        return new Date(dateA) - new Date(dateB);
+                    });
+                    setLastCalled(called[called.length - 1]);
+                }
+            } catch (error) {
+                console.error("Erreur chargement dernier appelé:", error);
             }
-        }
-    }, [queue, lastCalled]);
+        };
+
+        fetchLastCalled();
+
+        // Écouter les mises à jour en temps réel via Socket
+        const isLocal = window.location.hostname === 'localhost';
+        const BASE_URL = isLocal ? 'http://localhost:3001' : 'https://marchermo.onrender.com';
+
+        const socket = io(BASE_URL, {
+            transports: ['polling', 'websocket'],
+            reconnection: true
+        });
+
+        socket.on('client_called', (client) => {
+            setLastCalled(client);
+            setIsNewCall(true);
+            const timer = setTimeout(() => setIsNewCall(false), 8000);
+            return () => clearTimeout(timer);
+        });
+
+        return () => {
+            socket.off('client_called');
+            socket.disconnect();
+        };
+    }, []);
 
     return (
         <div style={{
@@ -76,7 +111,7 @@ export default function ScoreDisplay() {
                                 lineHeight: 1,
                                 fontFamily: 'Outfit, sans-serif'
                             }}>
-                                {lastCalled.ticketNumber}
+                                {lastCalled.ticket_number || lastCalled.ticketNumber || `#${lastCalled.id}`}
                             </span>
                         </div>
 
