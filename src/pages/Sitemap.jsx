@@ -15,42 +15,42 @@ const views = [
         desc: "Affichage à l'entrée pour le scan client",
         path: "/qr",
         icon: <QrCode size={32} />,
-        color: "#0a0a0a"
+        color: "#171717"
     },
     {
         title: "Accueil Client",
         desc: "Interface mobile de saisie du numéro",
         path: "/",
         icon: <Smartphone size={32} />,
-        color: "#0a0a0a"
+        color: "#171717"
     },
     {
         title: "Ticket Client",
         desc: "Suivi de la file en temps réel",
         path: "/status",
         icon: <UserCircle size={32} />,
-        color: "#0a0a0a"
+        color: "#171717"
     },
     {
         title: "Tableau Boucher",
         desc: "Gestion de la file d'attente",
         path: "/admin",
         icon: <LayoutDashboard size={32} />,
-        color: "#8B0000"
+        color: "#171717"
     },
     {
         title: "Analyses & Stats",
         desc: "Données et export Excel",
         path: "/analytics",
         icon: <BarChart3 size={32} />,
-        color: "#D4AF37"
+        color: "#171717"
     },
     {
         title: "Score Boutique",
         desc: "Affichage géant du numéro appelé",
         path: "/score",
         icon: <Navigation size={32} />,
-        color: "#16a34a"
+        color: "#171717"
     }
 ];
 
@@ -81,7 +81,7 @@ export default function Sitemap() {
                     animate={{ opacity: 1, y: 0 }}
                     style={{ fontSize: '3rem', marginBottom: '1rem' }}
                 >
-                    Sitemap
+                    Plan du Site 🗺️
                 </motion.h1>
                 <motion.p
                     initial={{ opacity: 0 }}

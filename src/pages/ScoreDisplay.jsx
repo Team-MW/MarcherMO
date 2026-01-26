@@ -123,7 +123,7 @@ export default function ScoreDisplay() {
             width: '100vw',
             display: 'grid',
             gridTemplateColumns: '2fr 1fr',
-            background: '#f8f9fa',
+            background: '#fafafa',
             overflow: 'hidden',
             position: 'relative' // Important pour l'overlay
         }}>
@@ -137,7 +137,7 @@ export default function ScoreDisplay() {
                         left: 0,
                         width: '100%',
                         height: '100%',
-                        background: 'rgba(0,0,0,0.8)',
+                        background: 'rgba(0,0,0,0.85)',
                         zIndex: 9999,
                         display: 'flex',
                         flexDirection: 'column',
@@ -148,7 +148,7 @@ export default function ScoreDisplay() {
                     }}
                 >
                     <Bell size={80} className="floating" />
-                    <h1 style={{ fontSize: '3rem', marginTop: '2rem' }}>Cliquer pour démarrer l'écran</h1>
+                    <h1 style={{ fontSize: '3rem', marginTop: '2rem' }}>Cliquer pour démarrer l'écran 👆</h1>
                     <p>(Active le son des notifications)</p>
                 </div>
             )}
@@ -178,22 +178,22 @@ export default function ScoreDisplay() {
                         >
                             <p style={{
                                 fontSize: '3vw',
-                                fontWeight: 600,
+                                fontWeight: 700,
                                 color: 'var(--text-light)',
                                 textTransform: 'uppercase',
-                                letterSpacing: '0.5rem',
+                                letterSpacing: '0.2rem',
                                 marginBottom: '2rem'
                             }}>
-                                C'est votre tour
+                                C'est votre tour 👋
                             </p>
 
                             <div style={{
-                                background: 'var(--text)',
+                                background: 'var(--primary)',
                                 color: '#fff',
                                 padding: '3vw 6vw',
                                 borderRadius: '40px',
-                                boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
-                                border: '8px solid var(--secondary)',
+                                boxShadow: '0 20px 60px rgba(0,0,0,0.2)',
+                                border: '1px solid rgba(255,255,255,0.1)',
                                 display: 'inline-block'
                             }}>
                                 <span style={{
@@ -212,7 +212,7 @@ export default function ScoreDisplay() {
                                     animate={{ opacity: 1, y: 0 }}
                                     style={{ marginTop: '3rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1rem' }}
                                 >
-                                    <Bell size={40} color="var(--secondary)" className="floating" />
+                                    <Bell size={40} color="var(--primary)" className="floating" />
                                     <span style={{ fontSize: '2vw', fontWeight: 700, color: 'var(--primary)' }}>
                                         Veuillez avancer au comptoir
                                     </span>
@@ -221,15 +221,15 @@ export default function ScoreDisplay() {
                         </motion.div>
                     ) : (
                         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                            <h1 style={{ fontSize: '4vw', color: '#ccc' }}>En attente...</h1>
+                            <h1 style={{ fontSize: '4vw', color: '#e5e5e5' }}>En attente... 🕖</h1>
                         </motion.div>
                     )}
                 </AnimatePresence>
 
                 {/* Footer Logo */}
                 <div style={{ position: 'absolute', bottom: '2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '5px' }}>
-                    <h2 style={{ fontSize: '1.5vw', color: 'var(--primary)', opacity: 0.3, margin: 0 }}>MARCHÉ MO</h2>
-                    <a href="https://microdidact.com" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', color: '#999', fontSize: '0.8vw', opacity: 0.6 }}>
+                    <h2 style={{ fontSize: '1.5vw', color: 'var(--primary)', opacity: 0.8, margin: 0 }}>MARCHÉ MO 🥩</h2>
+                    <a href="https://microdidact.com" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', color: 'var(--text-light)', fontSize: '0.8vw', opacity: 0.6 }}>
                         Réalisé par <strong>MICRODIDACT</strong>
                     </a>
                 </div>
@@ -237,7 +237,7 @@ export default function ScoreDisplay() {
 
             {/* DROITE : LISTE D'ATTENTE */}
             <div style={{
-                background: '#f0f2f5',
+                background: '#fafafa',
                 padding: '2rem',
                 display: 'flex',
                 flexDirection: 'column',
@@ -251,8 +251,8 @@ export default function ScoreDisplay() {
                     paddingBottom: '1rem',
                     borderBottom: '2px solid rgba(0,0,0,0.05)'
                 }}>
-                    <Users size={32} color="var(--text-light)" />
-                    <h2 style={{ margin: 0, fontSize: '2vw', color: 'var(--text)' }}>À SUIVRE</h2>
+                    <Users size={32} color="var(--text)" />
+                    <h2 style={{ margin: 0, fontSize: '2vw', color: 'var(--text)' }}>À SUIVRE 📋</h2>
                 </div>
 
                 <div style={{ overflowY: 'auto', flex: 1, paddingRight: '1rem' }}>
@@ -273,26 +273,27 @@ export default function ScoreDisplay() {
                                         display: 'flex',
                                         justifyContent: 'space-between',
                                         alignItems: 'center',
-                                        boxShadow: '0 4px 10px rgba(0,0,0,0.03)'
+                                        boxShadow: '0 4px 10px rgba(0,0,0,0.03)',
+                                        border: '1px solid rgba(0,0,0,0.05)'
                                     }}
                                 >
-                                    <span style={{ fontSize: '2.5vw', fontWeight: 700, color: 'var(--primary)' }}>
+                                    <span style={{ fontSize: '2.5vw', fontWeight: 800, color: 'var(--primary)' }}>
                                         {client.ticket_number || `#${client.id}`}
                                     </span>
                                     <span style={{
-                                        background: '#eee',
-                                        color: '#666',
+                                        background: '#f4f4f5',
+                                        color: '#52525b',
                                         padding: '0.4rem 0.8rem',
-                                        borderRadius: '20px',
+                                        borderRadius: '12px',
                                         fontSize: '1.2vw',
-                                        fontWeight: 600
+                                        fontWeight: 700
                                     }}>
                                         {index + 1}
                                     </span>
                                 </motion.div>
                             ))
                         ) : (
-                            <p style={{ textAlign: 'center', color: '#999', fontSize: '1.5vw', marginTop: '4rem' }}>
+                            <p style={{ textAlign: 'center', color: '#a1a1aa', fontSize: '1.5vw', marginTop: '4rem' }}>
                                 Personne en attente
                             </p>
                         )}
@@ -300,7 +301,7 @@ export default function ScoreDisplay() {
                 </div>
 
                 {waitingList.length > 8 && (
-                    <div style={{ textAlign: 'center', marginTop: '1rem', color: '#666', fontSize: '1.2vw' }}>
+                    <div style={{ textAlign: 'center', marginTop: '1rem', color: '#71717a', fontSize: '1.2vw' }}>
                         Et {waitingList.length - 8} autres...
                     </div>
                 )}

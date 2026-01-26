@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useQueue } from '../context/QueueContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Users, UserCheck, Play, RotateCcw, Phone, BarChart3 } from 'lucide-react';
+import { Users, UserCheck, Play, BarChart3 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { io } from 'socket.io-client';
 
 
 export default function ButcherAdmin() {
-    const { queue, callNext, resetQueue } = useQueue(); // On garde accès aux fonctions du context
+    const { queue, callNext } = useQueue(); // On garde accès aux fonctions du context
     const [calledList, setCalledList] = useState([]);
     const [localWaitingList, setLocalWaitingList] = useState([]); // State local pour la file d'attente (fallback)
 
@@ -74,55 +74,16 @@ export default function ButcherAdmin() {
         setTimeout(refreshAll, 500);
     };
 
-    // Wrapper pour reset
-    const handleReset = async () => {
-        if (window.confirm("Êtes-vous sûr de vouloir tout réinitialiser ?")) {
-            await resetQueue();
-            setTimeout(refreshAll, 500);
-        }
-    };
-
-    // Relancer le son sur la TV
-    const handleReplaySound = () => {
-        const isLocal = window.location.hostname === 'localhost';
-        const BASE_URL = isLocal ? 'http://localhost:3001' : 'https://marchermo.onrender.com';
-        const socket = io(BASE_URL);
-        socket.emit('replay_sound');
-        socket.disconnect(); // On se déconnecte juste après l'envoi pour ne pas garder de socket inutile ici
-    };
-
-    // Style commun pour les boutons
-    const btnStyle = {
-        padding: '0.8rem 1.2rem',
-        borderRadius: '8px',
-        border: 'none',
-        fontWeight: '600',
-        cursor: 'pointer',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '0.5rem',
-        transition: 'all 0.2s',
-        boxShadow: '0 2px 5px rgba(0,0,0,0.1)', // Ombre pour effet bouton
-        textTransform: 'uppercase',
-        fontSize: '0.9rem'
-    };
-
     return (
         <div className="container" style={{ maxWidth: '1000px', paddingBottom: '4rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-                <h1>Tableau de Bord Boucher</h1>
-                <div style={{ display: 'flex', gap: '1rem' }}>
-                    <button onClick={handleReplaySound} style={{ ...btnStyle, background: '#0ea5e9', color: 'white' }}>
-                        🔊 Son
-                    </button>
-                    <Link to="/analytics" style={{ ...btnStyle, background: '#64748b', color: 'white', textDecoration: 'none' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem', flexWrap: 'wrap', gap: '1rem' }}>
+                <h1 style={{ marginBottom: 0 }}>Tableau de Bord 🔪</h1>
+                <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+                    <Link to="/analytics" className="btn btn-secondary" style={{ textDecoration: 'none' }}>
                         <BarChart3 size={18} /> Stats
                     </Link>
-                    <button onClick={handleLogout} style={{ ...btnStyle, background: '#e2e8f0', color: '#475569' }}>
+                    <button onClick={handleLogout} className="btn btn-secondary">
                         Déconnexion
-                    </button>
-                    <button onClick={handleReset} style={{ ...btnStyle, background: '#ef4444', color: 'white' }}>
-                        <RotateCcw size={18} /> Reset
                     </button>
                 </div>
             </div>
@@ -130,76 +91,82 @@ export default function ButcherAdmin() {
             <div className="admin-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
                 {/* Left: Action & Waiting List */}
                 <div>
-                    <div className="glass-card" style={{ marginBottom: '2rem', textAlign: 'center', padding: '2rem' }}>
-                        <h3 style={{ marginBottom: '1.5rem', color: '#334155' }}>Prochain Client</h3>
+                    <div className="glass-card" style={{ marginBottom: '2rem', textAlign: 'center', padding: '2.5rem' }}>
+                        <h3 style={{ marginBottom: '1.5rem', color: 'var(--text)' }}>Prochain Client</h3>
                         <button
                             onClick={handleCallNext}
                             disabled={waitingList.length === 0}
+                            className="btn btn-primary"
                             style={{
-                                ...btnStyle,
                                 width: '100%',
                                 padding: '1.5rem',
-                                fontSize: '1.5rem',
-                                justifyContent: 'center',
-                                background: waitingList.length === 0 ? '#cbd5e1' : 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
-                                color: 'white',
-                                boxShadow: waitingList.length === 0 ? 'none' : '0 10px 20px rgba(34, 197, 94, 0.3)',
-                                transform: waitingList.length === 0 ? 'none' : 'translateY(-2px)',
-                                opacity: waitingList.length === 0 ? 0.7 : 1
+                                fontSize: '1.25rem',
+                                opacity: waitingList.length === 0 ? 0.5 : 1,
+                                cursor: waitingList.length === 0 ? 'not-allowed' : 'pointer'
                             }}
                         >
-                            <Play size={32} fill="currentColor" /> APPELER LE PROCHAIN
+                            <Play size={24} fill="currentColor" style={{ marginRight: '8px' }} />
+                            {waitingList.length === 0 ? 'En attente de clients...' : 'APPELER LE PROCHAIN 🔔'}
                         </button>
-                        <p style={{ marginTop: '1.5rem', color: '#64748b', fontWeight: '500' }}>
-                            {waitingList.length} client(s) en attente
+                        <p style={{ marginTop: '1.5rem', color: 'var(--text-light)', fontWeight: '500' }}>
+                            {waitingList.length} client(s) en attente 🕒
                         </p>
                     </div>
 
                     <div className="glass-card">
-                        <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            <Users size={20} /> Liste d'attente
+                        <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+                            <Users size={24} /> Liste d'attente
                         </h3>
-                        {/* ... */}
-                        <div style={{ marginTop: '1rem' }}>
+                        <div style={{ marginTop: '1.5rem' }}>
                             <AnimatePresence>
                                 {waitingList.map((client, index) => (
                                     <motion.div
                                         key={client.id}
-                                        initial={{ opacity: 0, x: -20 }}
+                                        initial={{ opacity: 0, x: -10 }}
                                         animate={{ opacity: 1, x: 0 }}
-                                        exit={{ opacity: 0, x: 20 }}
+                                        exit={{ opacity: 0, x: 10 }}
                                         style={{
-                                            padding: '1rem',
-                                            borderBottom: '1px solid #eee',
+                                            padding: '1.2rem',
+                                            borderBottom: '1px solid var(--accent)',
                                             display: 'flex',
                                             justifyContent: 'space-between',
-                                            alignItems: 'center'
+                                            alignItems: 'center',
+                                            marginBottom: '0.5rem',
+                                            background: 'white',
+                                            borderRadius: '12px',
+                                            boxShadow: '0 2px 4px rgba(0,0,0,0.02)'
                                         }}
                                     >
-                                        <div>
-                                            <div style={{ fontWeight: 800, color: 'var(--primary)', fontSize: '1.2rem' }}>{client.ticket_number || `#${client.id}`}</div>
-                                            <div style={{ fontSize: '0.9rem', color: 'var(--text-light)', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                                <Phone size={12} /> {client.phone}
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                            <div className="badge badge-waiting">{index + 1}</div>
+                                            <div>
+                                                <div style={{ fontWeight: 700, fontSize: '1.1rem' }}>{client.ticket_number || `#${client.id}`}</div>
+                                                <div style={{ fontSize: '0.9rem', color: 'var(--text-light)' }}>
+                                                    {client.phone}
+                                                </div>
                                             </div>
                                         </div>
-                                        <div className="badge badge-waiting">{index + 1}e</div>
                                     </motion.div>
                                 ))}
                             </AnimatePresence>
-                            {waitingList.length === 0 && <p style={{ textAlign: 'center', color: 'var(--text-light)', padding: '1rem' }}>Aucun client en attente</p>}
+                            {waitingList.length === 0 && (
+                                <div style={{ textAlign: 'center', padding: '3rem 1rem', display: 'flex', flexDirection: 'column', alignItems: 'center', opacity: 0.5 }}>
+                                    <Users size={48} style={{ marginBottom: '1rem' }} />
+                                    <p>La liste d'attente est vide</p>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
 
                 {/* Right: History */}
                 <div className="glass-card">
-                    <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <UserCheck size={20} /> Clients appelés
+                    <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+                        <UserCheck size={24} /> Déjà appelés
                     </h3>
-                    <div style={{ marginTop: '1rem' }}>
+                    <div style={{ marginTop: '1.5rem' }}>
                         <AnimatePresence>
                             {calledList.map((client) => {
-                                // Support created_at (SQL) ou timestamp (legacy)
                                 const calledTime = client.called_at || client.calledAt || client.timestamp;
                                 return (
                                     <motion.div
@@ -208,35 +175,33 @@ export default function ButcherAdmin() {
                                         animate={{ opacity: 1 }}
                                         style={{
                                             padding: '1rem',
-                                            borderBottom: '1px solid #eee',
+                                            borderBottom: '1px solid var(--accent)',
                                             display: 'flex',
                                             justifyContent: 'space-between',
-                                            alignItems: 'center',
-                                            background: 'rgba(22, 163, 74, 0.05)'
+                                            alignItems: 'center'
                                         }}
                                     >
                                         <div>
-                                            <div style={{ fontWeight: 800, color: 'var(--text-light)', fontSize: '1.1rem' }}>{client.ticket_number || `#${client.id}`}</div>
-                                            <div style={{ fontSize: '0.9rem', color: 'var(--text-light)', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                                <Phone size={12} /> {client.phone}
+                                            <div style={{ fontWeight: 600, color: 'var(--text-light)' }}>{client.ticket_number || `#${client.id}`}</div>
+                                            <div style={{ fontSize: '0.85rem', color: 'var(--text-light)', opacity: 0.8 }}>
+                                                {calledTime && new Date(calledTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                             </div>
-                                            {calledTime && <div style={{ fontSize: '0.8rem', color: 'var(--text-light)' }}>Appelé à {new Date(calledTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>}
                                         </div>
-                                        <div className="badge badge-called">Appelé</div>
+                                        <div className="badge badge-called" style={{ opacity: 0.7 }}>Appelé ✅</div>
                                     </motion.div>
                                 );
                             })}
                         </AnimatePresence>
-                        {calledList.length === 0 && <p style={{ textAlign: 'center', color: 'var(--text-light)', padding: '1rem' }}>Historique vide</p>}
+                        {calledList.length === 0 && <p style={{ textAlign: 'center', color: 'var(--text-light)', padding: '2rem' }}>Historique vide</p>}
                     </div>
                 </div>
             </div>
 
             {/* Footer Microdidact */}
-            <div style={{ textAlign: 'center', marginTop: '4rem', opacity: 0.6 }}>
+            <div style={{ textAlign: 'center', marginTop: '4rem', opacity: 0.4, fontSize: '0.9rem' }}>
                 <a href="https://microdidact.com" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', color: 'inherit', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
                     <span>Réalisé par</span>
-                    <span style={{ fontWeight: 'bold' }}>MICRODIDACT</span>
+                    <span style={{ fontWeight: 700, letterSpacing: '0.05em' }}>MICRODIDACT</span>
                 </a>
             </div>
         </div>

@@ -28,8 +28,8 @@ export default function ClientStatus() {
                         className="glass-card"
                         style={{ textAlign: 'center', position: 'relative', overflow: 'hidden' }}
                     >
-                        {/* Background Accent */}
-                        <div style={{ position: 'absolute', top: -50, right: -50, width: 150, height: 150, background: 'rgba(212, 175, 55, 0.05)', borderRadius: '50%' }} />
+                        {/* Background Accent - Simple White/Gray Circle instead of Gold */}
+                        <div style={{ position: 'absolute', top: -50, right: -50, width: 150, height: 150, background: 'rgba(0,0,0,0.03)', borderRadius: '50%' }} />
 
                         <div style={{ marginBottom: '2.5rem' }}>
                             <div className="floating">
@@ -37,7 +37,7 @@ export default function ClientStatus() {
                             </div>
                         </div>
 
-                        <h1 style={{ fontSize: '2.2rem', marginBottom: '1rem' }}>Patience... 🥩</h1>
+                        <h1 style={{ fontSize: '2.2rem', marginBottom: '1rem' }}>Patience... ⏳</h1>
                         <p style={{ color: 'var(--text-light)', fontSize: '1.1rem', marginBottom: '2.5rem' }}>
                             Nos bouchers préparent les meilleures pièces pour vous.
                         </p>
@@ -77,10 +77,10 @@ export default function ClientStatus() {
                             </div>
 
                             <div style={{
-                                background: 'rgba(212, 175, 55, 0.1)',
+                                background: '#fafafa',
                                 padding: '1.5rem',
                                 borderRadius: '16px',
-                                border: '1px solid rgba(212, 175, 55, 0.3)',
+                                border: '1px solid #eee',
                                 maxWidth: '500px',
                                 textAlign: 'center'
                             }}>
@@ -101,9 +101,9 @@ export default function ClientStatus() {
                         className="glass-card"
                         style={{
                             textAlign: 'center',
-                            borderColor: 'var(--secondary)',
+                            borderColor: 'var(--primary)',
                             borderWidth: '2px',
-                            background: 'linear-gradient(135deg, #ffffff 0%, #fffcf5 100%)'
+                            background: 'white'
                         }}
                     >
                         <motion.div
@@ -114,16 +114,16 @@ export default function ClientStatus() {
                             transition={{ repeat: Infinity, duration: 2 }}
                             style={{ marginBottom: '2rem' }}
                         >
-                            <Bell size={80} style={{ color: 'var(--secondary)', margin: '0 auto' }} />
+                            <Bell size={80} style={{ color: 'var(--primary)', margin: '0 auto' }} />
                         </motion.div>
 
-                        <h1 style={{ fontSize: '2.8rem', marginBottom: '1rem', color: 'var(--text)' }}>C'est à vous !</h1>
+                        <h1 style={{ fontSize: '2.8rem', marginBottom: '1rem', color: 'var(--text)' }}>C'est à vous ! 🎉</h1>
                         <p style={{ fontSize: '1.3rem', color: 'var(--text-light)', marginBottom: '2rem' }}>
                             Le boucher vous attend au comptoir.
                         </p>
 
                         <div style={{
-                            background: 'var(--text)',
+                            background: 'var(--primary)',
                             color: 'white',
                             padding: '1.5rem',
                             borderRadius: '20px',
@@ -146,9 +146,9 @@ export default function ClientStatus() {
                             transition={{ delay: 0.5 }}
                         >
                             <p style={{ fontWeight: 600, marginBottom: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-                                <Star size={20} fill="var(--secondary)" color="var(--secondary)" />
+                                <Star size={20} fill="var(--primary)" color="var(--primary)" />
                                 Votre avis nous fait plaisir !
-                                <Star size={20} fill="var(--secondary)" color="var(--secondary)" />
+                                <Star size={20} fill="var(--primary)" color="var(--primary)" />
                             </p>
 
                             <a
@@ -184,15 +184,15 @@ export default function ClientStatus() {
         .pulse-dot {
           width: 8px;
           height: 8px;
-          background: #16a34a;
+          background: var(--primary);
           border-radius: 50%;
-          box-shadow: 0 0 0 rgba(22, 163, 74, 0.4);
+          box-shadow: 0 0 0 rgba(0, 0, 0, 0.4);
           animation: pulse 2s infinite;
         }
         @keyframes pulse {
-          0% { box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.7); }
-          70% { box-shadow: 0 0 0 10px rgba(22, 163, 74, 0); }
-          100% { box-shadow: 0 0 0 0 rgba(22, 163, 74, 0); }
+          0% { box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.7); }
+          70% { box-shadow: 0 0 0 10px rgba(0, 0, 0, 0); }
+          100% { box-shadow: 0 0 0 0 rgba(0, 0, 0, 0); }
         }
       `}} />
         </div>
