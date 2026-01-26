@@ -76,15 +76,29 @@ export default function ButcherAdmin() {
 
     // Wrapper pour reset
     const handleReset = async () => {
-        await resetQueue();
-        setTimeout(refreshAll, 500);
+        if (window.confirm("Êtes-vous sûr de vouloir tout réinitialiser ?")) {
+            await resetQueue();
+            setTimeout(refreshAll, 500);
+        }
+    };
+
+    // Relancer le son sur la TV
+    const handleReplaySound = () => {
+        const isLocal = window.location.hostname === 'localhost';
+        const BASE_URL = isLocal ? 'http://localhost:3001' : 'https://marchermo.onrender.com';
+        const socket = io(BASE_URL);
+        socket.emit('replay_sound');
+        socket.disconnect(); // On se déconnecte juste après l'envoi pour ne pas garder de socket inutile ici
     };
 
     return (
-        <div className="container" style={{ maxWidth: '1000px' }}>
+        <div className="container" style={{ maxWidth: '1000px', paddingBottom: '4rem' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
                 <h1>Tableau de Bord Boucher</h1>
                 <div style={{ display: 'flex', gap: '1rem' }}>
+                    <button onClick={handleReplaySound} className="btn" style={{ background: '#e0f2fe', color: '#0369a1' }}>
+                        🔊 Son
+                    </button>
                     <Link to="/analytics" className="btn btn-secondary" style={{ textDecoration: 'none' }}>
                         <BarChart3 size={18} /> Statistiques
                     </Link>
@@ -98,6 +112,7 @@ export default function ButcherAdmin() {
             </div>
 
             <div className="admin-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+                {/* ... (Reste du contenu inchangé) ... */}
                 {/* Left: Action & Waiting List */}
                 <div>
                     <div className="glass-card" style={{ marginBottom: '2rem', textAlign: 'center' }}>
@@ -119,6 +134,7 @@ export default function ButcherAdmin() {
                         <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                             <Users size={20} /> Liste d'attente
                         </h3>
+                        {/* ... */}
                         <div style={{ marginTop: '1rem' }}>
                             <AnimatePresence>
                                 {waitingList.map((client, index) => (
@@ -189,6 +205,14 @@ export default function ButcherAdmin() {
                         {calledList.length === 0 && <p style={{ textAlign: 'center', color: 'var(--text-light)', padding: '1rem' }}>Historique vide</p>}
                     </div>
                 </div>
+            </div>
+
+            {/* Footer Microdidact */}
+            <div style={{ textAlign: 'center', marginTop: '4rem', opacity: 0.6 }}>
+                <a href="https://microdidact.com" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', color: 'inherit', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                    <span>Réalisé par</span>
+                    <span style={{ fontWeight: 'bold' }}>MICRODIDACT</span>
+                </a>
             </div>
         </div>
     );

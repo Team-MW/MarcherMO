@@ -10,9 +10,17 @@ export default function ScoreDisplay() {
     const [waitingList, setWaitingList] = useState([]);
     const [isNewCall, setIsNewCall] = useState(false);
 
-    // Référence pour le son pour éviter de le recréer à chaque render
-    // Note: Le navigateur bloquera le son tant que l'utilisateur n'a pas interagi avec la page (clic)
     const audioRef = useRef(new Audio(notificationSound));
+
+    // Fonction pour jouer le son (appelée par nouveau client OU bouton admin)
+    const playNotificationSound = () => {
+        if (audioRef.current) {
+            audioRef.current.currentTime = 0;
+            audioRef.current.play().catch(e => {
+                console.log("Audio bloqué (cliquez sur la page svp):", e);
+            });
+        }
+    };
 
     const refreshData = async () => {
         try {
@@ -22,6 +30,7 @@ export default function ScoreDisplay() {
             // 1. Chercher le dernier appelé
             const histRes = await axios.get(`${BASE_URL}/api/history?filter=today`);
             const called = histRes.data.filter(q => q.status === 'called');
+
             if (called.length > 0) {
                 // Trier pour avoir le plus récent
                 called.sort((a, b) => {
@@ -32,14 +41,10 @@ export default function ScoreDisplay() {
                 const latest = called[called.length - 1];
 
                 setLastCalled(prev => {
-                    // Si c'est un nouveau client (ID différent), on déclenche l'effet
+                    // Si c'est un nouveau client (ID différent), on déclenche l'animation et le son
                     if (latest && prev?.id !== latest.id) {
                         setIsNewCall(true);
-                        // Jouer le son
-                        // IMPORTANT: Nécessite une interaction utilisateur préalable sur la page
-                        audioRef.current.currentTime = 0;
-                        audioRef.current.play().catch(e => console.log("Audio autoplay bloqué (cliquez sur la page pour activer le son):", e));
-
+                        playNotificationSound();
                         setTimeout(() => setIsNewCall(false), 8000);
                     }
                     return latest;
@@ -67,6 +72,12 @@ export default function ScoreDisplay() {
         socket.on('client_called', refreshData);
         socket.on('queue_updated', refreshData);
 
+        // Ecouter la demande de replay venant de l'admin
+        socket.on('play_sound', () => {
+            console.log("🔊 Replay sound requested");
+            playNotificationSound();
+        });
+
         // Polling de sécurité
         const interval = setInterval(refreshData, 3000);
 
@@ -84,7 +95,7 @@ export default function ScoreDisplay() {
             height: '100vh',
             width: '100vw',
             display: 'grid',
-            gridTemplateColumns: '2fr 1fr', // 2/3 écran pour appel, 1/3 pour liste
+            gridTemplateColumns: '2fr 1fr',
             background: '#f8f9fa',
             overflow: 'hidden'
         }}>
@@ -161,9 +172,12 @@ export default function ScoreDisplay() {
                     )}
                 </AnimatePresence>
 
-                {/* Footer */}
-                <div style={{ position: 'absolute', bottom: '2rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                    <h2 style={{ fontSize: '2vw', color: 'var(--primary)', opacity: 0.3 }}>MARCHÉ MO</h2>
+                {/* Footer Logo */}
+                <div style={{ position: 'absolute', bottom: '2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '5px' }}>
+                    <h2 style={{ fontSize: '1.5vw', color: 'var(--primary)', opacity: 0.3, margin: 0 }}>MARCHÉ MO</h2>
+                    <a href="https://microdidact.com" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', color: '#999', fontSize: '0.8vw', opacity: 0.6 }}>
+                        Réalisé par <strong>MICRODIDACT</strong>
+                    </a>
                 </div>
             </div>
 
@@ -225,7 +239,7 @@ export default function ScoreDisplay() {
                             ))
                         ) : (
                             <p style={{ textAlign: 'center', color: '#999', fontSize: '1.5vw', marginTop: '4rem' }}>
-                                Aucun autre client en attente
+                                Personne en attente
                             </p>
                         )}
                     </AnimatePresence>

@@ -32,6 +32,19 @@ const io = new Server(server, {
 app.use(cors());
 app.use(express.json());
 
+io.on('connection', (socket) => {
+    console.log('Un client est connecté');
+
+    socket.on('replay_sound', () => {
+        console.log('🔊 Replaying sound requested by admin');
+        io.emit('play_sound');
+    });
+
+    socket.on('disconnect', () => {
+        console.log('Un client est déconnecté');
+    });
+});
+
 // =====================================================
 // ROUTES API AVEC BASE DE DONNÉES
 // =====================================================
