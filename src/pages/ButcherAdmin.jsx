@@ -6,27 +6,35 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { io } from 'socket.io-client';
 
+
 export default function ButcherAdmin() {
-    const { queue, callNext, resetQueue } = useQueue(); // queue vient du contexte (socket global)
+    const { queue, callNext, resetQueue } = useQueue(); // On garde accès aux fonctions du context
     const [calledList, setCalledList] = useState([]);
+    const [localWaitingList, setLocalWaitingList] = useState([]); // State local pour la file d'attente (fallback)
 
-    // La file d'attente (waiting) vient du context (temps réel)
-    const waitingList = queue.filter(q => q.status === 'waiting');
+    // On utilise la liste locale si elle est remplie, sinon celle du contexte
+    const waitingList = localWaitingList.length > 0 || calledList.length > 0 ? localWaitingList : queue.filter(q => q.status === 'waiting');
 
-    // Charger l'historique des appelés
-    const fetchHistory = async () => {
+    // Fonction unifiée pour tout recharger depuis l'API
+    const refreshAll = async () => {
         try {
             const isLocal = window.location.hostname === 'localhost';
             const BASE_URL = isLocal ? 'http://localhost:3001' : 'https://marchermo.onrender.com';
-            const response = await axios.get(`${BASE_URL}/api/history?filter=today`);
-            const called = response.data.filter(q => q.status === 'called').reverse();
-            setCalledList(called);
+
+            // 1. Charger l'historique (Appelés)
+            const histRes = await axios.get(`${BASE_URL}/api/history?filter=today`);
+            setCalledList(histRes.data.filter(q => q.status === 'called').reverse());
+
+            // 2. Charger la file d'attente (En attente)
+            const queueRes = await axios.get(`${BASE_URL}/api/queue`);
+            setLocalWaitingList(queueRes.data);
+
         } catch (error) {
-            console.error("Erreur chargement historique:", error);
+            console.error("Erreur rafraîchissement polling:", error);
         }
     };
 
-    // Écouter les mises à jour en temps réel pour l'historique aussi
+    // Écouter les mises à jour en temps réel + Polling
     useEffect(() => {
         const isLocal = window.location.hostname === 'localhost';
         const BASE_URL = isLocal ? 'http://localhost:3001' : 'https://marchermo.onrender.com';
@@ -36,20 +44,15 @@ export default function ButcherAdmin() {
             reconnection: true
         });
 
-        // Quand la file change (quelqu'un rejoint ou est appelé)
-        socket.on('queue_updated', () => {
-            fetchHistory(); // Rafraîchir l'historique
-        });
-
-        // Quand un client est appelé spécifiquement
-        socket.on('client_called', () => {
-            fetchHistory();
-        });
+        // Socket events
+        socket.on('queue_updated', refreshAll);
+        socket.on('client_called', refreshAll);
 
         // FALLBACK: Actualisation automatique toutes les 3 secondes
-        const pollingInterval = setInterval(() => {
-            fetchHistory();
-        }, 3000);
+        const pollingInterval = setInterval(refreshAll, 3000);
+
+        // Appel initial
+        refreshAll();
 
         return () => {
             socket.off('queue_updated');
@@ -59,20 +62,21 @@ export default function ButcherAdmin() {
         };
     }, []);
 
-    // Charger au démarrage et quand la file locale change
-    useEffect(() => {
-        fetchHistory();
-    }, [queue]);
-
     const handleLogout = () => {
         localStorage.removeItem('admin_auth');
         window.location.reload();
     };
 
-    // Fonction wrapper pour callNext qui rafraîchit l'historique après
+    // Fonction wrapper pour callNext qui rafraîchit tout après
     const handleCallNext = async () => {
         await callNext();
-        setTimeout(fetchHistory, 500); // Petit délai pour laisser le temps à la DB de mettre à jour
+        setTimeout(refreshAll, 500);
+    };
+
+    // Wrapper pour reset
+    const handleReset = async () => {
+        await resetQueue();
+        setTimeout(refreshAll, 500);
     };
 
     return (
@@ -86,7 +90,7 @@ export default function ButcherAdmin() {
                     <button onClick={handleLogout} className="btn" style={{ background: '#eee', color: '#666' }}>
                         Déconnexion
                     </button>
-                    <button onClick={resetQueue} className="btn" style={{ background: '#fee2e2', color: '#991b1b' }}>
+                    <button onClick={handleReset} className="btn" style={{ background: '#fee2e2', color: '#991b1b' }}>
                         <RotateCcw size={18} /> Réinitialiser
                     </button>
                 </div>
