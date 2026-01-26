@@ -23,7 +23,8 @@ export default function ButcherAdmin() {
 
             // 1. Charger l'historique (Appelés)
             const histRes = await axios.get(`${BASE_URL}/api/history?filter=today`);
-            setCalledList(histRes.data.filter(q => q.status === 'called').reverse());
+            // L'API renvoie déjà par ordre décroissant (DESC), donc on ne reverse pas
+            setCalledList(histRes.data.filter(q => q.status === 'called'));
 
             // 2. Charger la file d'attente (En attente)
             const queueRes = await axios.get(`${BASE_URL}/api/queue`);
