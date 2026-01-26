@@ -4,9 +4,11 @@ import axios from 'axios';
 
 const QueueContext = createContext();
 
-// Détection dynamique de l'URL du serveur
+// Configuration de l'URL du backend
 const isLocal = window.location.hostname === 'localhost';
-const BASE_URL = isLocal ? 'http://localhost:3001' : window.location.origin;
+const BASE_URL = isLocal
+  ? 'http://localhost:3001'                    // Développement local
+  : 'https://marchermo.onrender.com';          // Production : Backend sur Render
 
 const socket = io(BASE_URL);
 const API_URL = `${BASE_URL}/api`;
