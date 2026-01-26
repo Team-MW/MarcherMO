@@ -1,17 +1,45 @@
+import { useState, useEffect } from 'react';
 import { useQueue } from '../context/QueueContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Users, UserCheck, Play, RotateCcw, Phone, BarChart3 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import axios from 'axios';
 
 export default function ButcherAdmin() {
     const { queue, callNext, resetQueue } = useQueue();
+    const [calledList, setCalledList] = useState([]);
 
+    // La file d'attente (waiting) vient du context (temps réel)
     const waitingList = queue.filter(q => q.status === 'waiting');
-    const calledList = queue.filter(q => q.status === 'called').reverse();
+
+    // Charger l'historique des appelés
+    const fetchHistory = async () => {
+        try {
+            const isLocal = window.location.hostname === 'localhost';
+            const BASE_URL = isLocal ? 'http://localhost:3001' : 'https://marchermo.onrender.com';
+            const response = await axios.get(`${BASE_URL}/api/history?filter=today`);
+            // Filtrer seulement les appelés et inverser pour avoir les plus récents en haut
+            const called = response.data.filter(q => q.status === 'called').reverse();
+            setCalledList(called);
+        } catch (error) {
+            console.error("Erreur chargement historique:", error);
+        }
+    };
+
+    // Charger au démarrage et rafraîchir quand la file change
+    useEffect(() => {
+        fetchHistory();
+    }, [queue]); // Se rafraîchit quand quelqu'un est appelé (car la queue change)
 
     const handleLogout = () => {
         localStorage.removeItem('admin_auth');
         window.location.reload();
+    };
+
+    // Fonction wrapper pour callNext qui rafraîchit l'historique après
+    const handleCallNext = async () => {
+        await callNext();
+        setTimeout(fetchHistory, 500); // Petit délai pour laisser le temps à la DB de mettre à jour
     };
 
     return (
@@ -37,7 +65,7 @@ export default function ButcherAdmin() {
                     <div className="glass-card" style={{ marginBottom: '2rem', textAlign: 'center' }}>
                         <h3 style={{ marginBottom: '1.5rem' }}>Prochain Client</h3>
                         <button
-                            onClick={callNext}
+                            onClick={handleCallNext}
                             className="btn btn-primary"
                             style={{ width: '100%', padding: '2rem', fontSize: '1.5rem' }}
                             disabled={waitingList.length === 0}
@@ -70,7 +98,7 @@ export default function ButcherAdmin() {
                                         }}
                                     >
                                         <div>
-                                            <div style={{ fontWeight: 800, color: 'var(--primary)', fontSize: '1.2rem' }}>{client.ticketNumber || `#${client.id.slice(-4)}`}</div>
+                                            <div style={{ fontWeight: 800, color: 'var(--primary)', fontSize: '1.2rem' }}>{client.ticket_number || `#${client.id}`}</div>
                                             <div style={{ fontSize: '0.9rem', color: 'var(--text-light)', display: 'flex', alignItems: 'center', gap: '4px' }}>
                                                 <Phone size={12} /> {client.phone}
                                             </div>
@@ -91,30 +119,34 @@ export default function ButcherAdmin() {
                     </h3>
                     <div style={{ marginTop: '1rem' }}>
                         <AnimatePresence>
-                            {calledList.map((client) => (
-                                <motion.div
-                                    key={client.id}
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    style={{
-                                        padding: '1rem',
-                                        borderBottom: '1px solid #eee',
-                                        display: 'flex',
-                                        justifyContent: 'space-between',
-                                        alignItems: 'center',
-                                        background: 'rgba(22, 163, 74, 0.05)'
-                                    }}
-                                >
-                                    <div>
-                                        <div style={{ fontWeight: 800, color: 'var(--text-light)', fontSize: '1.1rem' }}>{client.ticketNumber || `#${client.id.slice(-4)}`}</div>
-                                        <div style={{ fontSize: '0.9rem', color: 'var(--text-light)', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                            <Phone size={12} /> {client.phone}
+                            {calledList.map((client) => {
+                                // Support created_at (SQL) ou timestamp (legacy)
+                                const calledTime = client.called_at || client.calledAt || client.timestamp;
+                                return (
+                                    <motion.div
+                                        key={client.id}
+                                        initial={{ opacity: 0 }}
+                                        animate={{ opacity: 1 }}
+                                        style={{
+                                            padding: '1rem',
+                                            borderBottom: '1px solid #eee',
+                                            display: 'flex',
+                                            justifyContent: 'space-between',
+                                            alignItems: 'center',
+                                            background: 'rgba(22, 163, 74, 0.05)'
+                                        }}
+                                    >
+                                        <div>
+                                            <div style={{ fontWeight: 800, color: 'var(--text-light)', fontSize: '1.1rem' }}>{client.ticket_number || `#${client.id}`}</div>
+                                            <div style={{ fontSize: '0.9rem', color: 'var(--text-light)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                <Phone size={12} /> {client.phone}
+                                            </div>
+                                            {calledTime && <div style={{ fontSize: '0.8rem', color: 'var(--text-light)' }}>Appelé à {new Date(calledTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>}
                                         </div>
-                                        {client.timestamp && <div style={{ fontSize: '0.8rem', color: 'var(--text-light)' }}>Appelé à {new Date(client.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>}
-                                    </div>
-                                    <div className="badge badge-called">Appelé</div>
-                                </motion.div>
-                            ))}
+                                        <div className="badge badge-called">Appelé</div>
+                                    </motion.div>
+                                );
+                            })}
                         </AnimatePresence>
                         {calledList.length === 0 && <p style={{ textAlign: 'center', color: 'var(--text-light)', padding: '1rem' }}>Historique vide</p>}
                     </div>
