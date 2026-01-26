@@ -9,15 +9,25 @@ export default function ScoreDisplay() {
     const [lastCalled, setLastCalled] = useState(null);
     const [waitingList, setWaitingList] = useState([]);
     const [isNewCall, setIsNewCall] = useState(false);
+    const [soundEnabled, setSoundEnabled] = useState(false); // État pour savoir si le son est activé
 
     const audioRef = useRef(new Audio(notificationSound));
+
+    // Activer le son (au premier clic)
+    const enableSound = () => {
+        audioRef.current.play().then(() => {
+            audioRef.current.pause();
+            audioRef.current.currentTime = 0;
+            setSoundEnabled(true);
+        }).catch(e => console.error("Impossible d'activer le son:", e));
+    };
 
     // Fonction pour jouer le son (appelée par nouveau client OU bouton admin)
     const playNotificationSound = () => {
         if (audioRef.current) {
             audioRef.current.currentTime = 0;
             audioRef.current.play().catch(e => {
-                console.log("Audio bloqué (cliquez sur la page svp):", e);
+                console.log("Audio bloqué:", e);
             });
         }
     };
@@ -97,8 +107,35 @@ export default function ScoreDisplay() {
             display: 'grid',
             gridTemplateColumns: '2fr 1fr',
             background: '#f8f9fa',
-            overflow: 'hidden'
+            overflow: 'hidden',
+            position: 'relative' // Important pour l'overlay
         }}>
+            {/* OVERLAY INITIAL POUR ACTIVER LE SON */}
+            {!soundEnabled && (
+                <div
+                    onClick={enableSound}
+                    style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        width: '100%',
+                        height: '100%',
+                        background: 'rgba(0,0,0,0.8)',
+                        zIndex: 9999,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        cursor: 'pointer',
+                        color: 'white'
+                    }}
+                >
+                    <Bell size={80} className="floating" />
+                    <h1 style={{ fontSize: '3rem', marginTop: '2rem' }}>Cliquer pour démarrer l'écran</h1>
+                    <p>(Active le son des notifications)</p>
+                </div>
+            )}
+
             {/* GAUCHE : APPEL EN COURS */}
             <div style={{
                 display: 'flex',

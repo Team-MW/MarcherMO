@@ -91,41 +91,66 @@ export default function ButcherAdmin() {
         socket.disconnect(); // On se déconnecte juste après l'envoi pour ne pas garder de socket inutile ici
     };
 
+    // Style commun pour les boutons
+    const btnStyle = {
+        padding: '0.8rem 1.2rem',
+        borderRadius: '8px',
+        border: 'none',
+        fontWeight: '600',
+        cursor: 'pointer',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '0.5rem',
+        transition: 'all 0.2s',
+        boxShadow: '0 2px 5px rgba(0,0,0,0.1)', // Ombre pour effet bouton
+        textTransform: 'uppercase',
+        fontSize: '0.9rem'
+    };
+
     return (
         <div className="container" style={{ maxWidth: '1000px', paddingBottom: '4rem' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
                 <h1>Tableau de Bord Boucher</h1>
                 <div style={{ display: 'flex', gap: '1rem' }}>
-                    <button onClick={handleReplaySound} className="btn" style={{ background: '#e0f2fe', color: '#0369a1' }}>
+                    <button onClick={handleReplaySound} style={{ ...btnStyle, background: '#0ea5e9', color: 'white' }}>
                         🔊 Son
                     </button>
-                    <Link to="/analytics" className="btn btn-secondary" style={{ textDecoration: 'none' }}>
-                        <BarChart3 size={18} /> Statistiques
+                    <Link to="/analytics" style={{ ...btnStyle, background: '#64748b', color: 'white', textDecoration: 'none' }}>
+                        <BarChart3 size={18} /> Stats
                     </Link>
-                    <button onClick={handleLogout} className="btn" style={{ background: '#eee', color: '#666' }}>
+                    <button onClick={handleLogout} style={{ ...btnStyle, background: '#e2e8f0', color: '#475569' }}>
                         Déconnexion
                     </button>
-                    <button onClick={handleReset} className="btn" style={{ background: '#fee2e2', color: '#991b1b' }}>
-                        <RotateCcw size={18} /> Réinitialiser
+                    <button onClick={handleReset} style={{ ...btnStyle, background: '#ef4444', color: 'white' }}>
+                        <RotateCcw size={18} /> Reset
                     </button>
                 </div>
             </div>
 
             <div className="admin-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
-                {/* ... (Reste du contenu inchangé) ... */}
                 {/* Left: Action & Waiting List */}
                 <div>
-                    <div className="glass-card" style={{ marginBottom: '2rem', textAlign: 'center' }}>
-                        <h3 style={{ marginBottom: '1.5rem' }}>Prochain Client</h3>
+                    <div className="glass-card" style={{ marginBottom: '2rem', textAlign: 'center', padding: '2rem' }}>
+                        <h3 style={{ marginBottom: '1.5rem', color: '#334155' }}>Prochain Client</h3>
                         <button
                             onClick={handleCallNext}
-                            className="btn btn-primary"
-                            style={{ width: '100%', padding: '2rem', fontSize: '1.5rem' }}
                             disabled={waitingList.length === 0}
+                            style={{
+                                ...btnStyle,
+                                width: '100%',
+                                padding: '1.5rem',
+                                fontSize: '1.5rem',
+                                justifyContent: 'center',
+                                background: waitingList.length === 0 ? '#cbd5e1' : 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
+                                color: 'white',
+                                boxShadow: waitingList.length === 0 ? 'none' : '0 10px 20px rgba(34, 197, 94, 0.3)',
+                                transform: waitingList.length === 0 ? 'none' : 'translateY(-2px)',
+                                opacity: waitingList.length === 0 ? 0.7 : 1
+                            }}
                         >
-                            <Play size={32} /> Appeler le prochain
+                            <Play size={32} fill="currentColor" /> APPELER LE PROCHAIN
                         </button>
-                        <p style={{ marginTop: '1rem', color: 'var(--text-light)' }}>
+                        <p style={{ marginTop: '1.5rem', color: '#64748b', fontWeight: '500' }}>
                             {waitingList.length} client(s) en attente
                         </p>
                     </div>
