@@ -4,9 +4,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Users, UserCheck, Play, RotateCcw, Phone, BarChart3 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
+import { io } from 'socket.io-client';
 
 export default function ButcherAdmin() {
-    const { queue, callNext, resetQueue } = useQueue();
+    const { queue, callNext, resetQueue } = useQueue(); // queue vient du contexte (socket global)
     const [calledList, setCalledList] = useState([]);
 
     // La file d'attente (waiting) vient du context (temps réel)
@@ -18,7 +19,6 @@ export default function ButcherAdmin() {
             const isLocal = window.location.hostname === 'localhost';
             const BASE_URL = isLocal ? 'http://localhost:3001' : 'https://marchermo.onrender.com';
             const response = await axios.get(`${BASE_URL}/api/history?filter=today`);
-            // Filtrer seulement les appelés et inverser pour avoir les plus récents en haut
             const called = response.data.filter(q => q.status === 'called').reverse();
             setCalledList(called);
         } catch (error) {
@@ -26,10 +26,37 @@ export default function ButcherAdmin() {
         }
     };
 
-    // Charger au démarrage et rafraîchir quand la file change
+    // Écouter les mises à jour en temps réel pour l'historique aussi
+    useEffect(() => {
+        const isLocal = window.location.hostname === 'localhost';
+        const BASE_URL = isLocal ? 'http://localhost:3001' : 'https://marchermo.onrender.com';
+
+        const socket = io(BASE_URL, {
+            transports: ['polling', 'websocket'],
+            reconnection: true
+        });
+
+        // Quand la file change (quelqu'un rejoint ou est appelé)
+        socket.on('queue_updated', () => {
+            fetchHistory(); // Rafraîchir l'historique
+        });
+
+        // Quand un client est appelé spécifiquement
+        socket.on('client_called', () => {
+            fetchHistory();
+        });
+
+        return () => {
+            socket.off('queue_updated');
+            socket.off('client_called');
+            socket.disconnect();
+        };
+    }, []);
+
+    // Charger au démarrage et quand la file locale change
     useEffect(() => {
         fetchHistory();
-    }, [queue]); // Se rafraîchit quand quelqu'un est appelé (car la queue change)
+    }, [queue]);
 
     const handleLogout = () => {
         localStorage.removeItem('admin_auth');
