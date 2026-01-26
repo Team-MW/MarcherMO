@@ -9,9 +9,16 @@ export default function ScoreDisplay() {
     const [lastCalled, setLastCalled] = useState(null);
     const [waitingList, setWaitingList] = useState([]);
     const [isNewCall, setIsNewCall] = useState(false);
-    const [soundEnabled, setSoundEnabled] = useState(false); // État pour savoir si le son est activé
+    const [soundEnabled, setSoundEnabled] = useState(false);
 
-    const audioRef = useRef(new Audio(notificationSound));
+    // Refs pour gérer l'audio et l'anti-rebond
+    const audioRef = useRef(null);
+    const lastPlayTime = useRef(0); // Timestamp du dernier son joué
+
+    // Initialisation Lazy de l'audio (une seule fois)
+    if (!audioRef.current) {
+        audioRef.current = new Audio(notificationSound);
+    }
 
     // Activer le son (au premier clic)
     const enableSound = () => {
@@ -22,9 +29,16 @@ export default function ScoreDisplay() {
         }).catch(e => console.error("Impossible d'activer le son:", e));
     };
 
-    // Fonction pour jouer le son (appelée par nouveau client OU bouton admin)
+    // Fonction pour jouer le son AVEC ANTI-REBOND (Debounce)
     const playNotificationSound = () => {
+        const now = Date.now();
+        // Si le son a été joué il y a moins de 3 secondes, on ignore !
+        if (now - lastPlayTime.current < 3000) {
+            return;
+        }
+
         if (audioRef.current) {
+            lastPlayTime.current = now; // On note l'heure
             audioRef.current.currentTime = 0;
             audioRef.current.play().catch(e => {
                 console.log("Audio bloqué:", e);
