@@ -79,7 +79,7 @@ export default function Sitemap() {
                 <motion.h1
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    style={{ fontSize: '3rem', marginBottom: '1rem' }}
+                    style={{ fontSize: '3rem', marginBottom: '1rem', display: 'none' }}
                 >
                     Plan du Site 🗺️
                 </motion.h1>
