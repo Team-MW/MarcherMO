@@ -77,7 +77,7 @@ export default function ButcherAdmin() {
     return (
         <div className="container" style={{ maxWidth: '1000px', paddingBottom: '4rem' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem', flexWrap: 'wrap', gap: '1rem' }}>
-                <h1 style={{ marginBottom: 0 }}>Tableau de Bord 🔪</h1>
+                <h1 style={{ marginBottom: 0 }}>Tableau de Bord 🥩</h1>
                 <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
                     <Link to="/analytics" className="btn btn-secondary" style={{ textDecoration: 'none' }}>
                         <BarChart3 size={18} /> Stats

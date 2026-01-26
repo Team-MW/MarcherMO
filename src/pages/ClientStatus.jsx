@@ -1,10 +1,11 @@
 import { useQueue } from '../context/QueueContext';
+import { useLanguage } from '../context/LanguageContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Bell, CheckCircle2, Loader2, Star, MapPin, ExternalLink, MessageSquareHeart } from 'lucide-react';
-import { useEffect } from 'react';
 
 export default function ClientStatus() {
     const { queue, currentUser } = useQueue();
+    const { t, isRTL } = useLanguage();
 
     const myQueueInfo = queue.find(q => q.id === currentUser?.id);
     const isCalled = myQueueInfo?.status === 'called';
@@ -28,7 +29,7 @@ export default function ClientStatus() {
                         className="glass-card"
                         style={{ textAlign: 'center', position: 'relative', overflow: 'hidden' }}
                     >
-                        {/* Background Accent - Simple White/Gray Circle instead of Gold */}
+                        {/* Background Accent */}
                         <div style={{ position: 'absolute', top: -50, right: -50, width: 150, height: 150, background: 'rgba(0,0,0,0.03)', borderRadius: '50%' }} />
 
                         <div style={{ marginBottom: '2.5rem' }}>
@@ -37,9 +38,9 @@ export default function ClientStatus() {
                             </div>
                         </div>
 
-                        <h1 style={{ fontSize: '2.2rem', marginBottom: '1rem' }}>Patience... ⏳</h1>
+                        <h1 style={{ fontSize: '2.2rem', marginBottom: '1rem' }}>{t('status', 'title_waiting')}</h1>
                         <p style={{ color: 'var(--text-light)', fontSize: '1.1rem', marginBottom: '2.5rem' }}>
-                            Nos bouchers préparent les meilleures pièces pour vous.
+                            {t('status', 'subtitle_waiting')}
                         </p>
 
                         <div style={{
@@ -51,11 +52,11 @@ export default function ClientStatus() {
                             border: '1px solid #f0f0f0'
                         }}>
                             <p style={{ textTransform: 'uppercase', letterSpacing: '0.1em', fontSize: '0.8rem', fontWeight: 700, color: 'var(--text)', marginBottom: '1rem' }}>
-                                Votre Ticket : <span style={{ color: 'var(--primary)', fontSize: '1.2rem' }}>{myQueueInfo?.ticketNumber}</span>
+                                {t('status', 'ticket_label')} : <span style={{ color: 'var(--primary)', fontSize: '1.2rem' }}>{myQueueInfo?.ticketNumber}</span>
                             </p>
                             <hr style={{ border: 'none', borderTop: '1px solid #eee', marginBottom: '1rem' }} />
                             <p style={{ textTransform: 'uppercase', letterSpacing: '0.1em', fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-light)', marginBottom: '0.5rem' }}>
-                                Position actuelle
+                                {t('status', 'position_label')}
                             </p>
                             <motion.span
                                 key={positionsAhead}
@@ -63,17 +64,17 @@ export default function ClientStatus() {
                                 animate={{ scale: 1, opacity: 1 }}
                                 style={{ fontSize: '4.5rem', fontWeight: 800, color: 'var(--text)', display: 'block', lineHeight: 1 }}
                             >
-                                {positionsAhead === 0 ? "Bientôt !" : positionsAhead}
+                                {positionsAhead === 0 ? t('status', 'soon') : positionsAhead}
                             </motion.span>
                             <p style={{ color: 'var(--text-light)', marginTop: '0.5rem' }}>
-                                {positionsAhead > 0 ? "personnes devant vous" : "Vous êtes le prochain !"}
+                                {positionsAhead > 0 ? `${positionsAhead} ${t('status', 'persons_ahead')}` : t('status', 'next_label')}
                             </p>
                         </div>
 
                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.5rem', marginTop: '2rem' }}>
                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', color: 'var(--text-light)', fontSize: '0.9rem' }}>
                                 <div className="pulse-dot" />
-                                Actualisation en temps réel
+                                {t('status', 'realtime_label')}
                             </div>
 
                             <div style={{
@@ -85,10 +86,10 @@ export default function ClientStatus() {
                                 textAlign: 'center'
                             }}>
                                 <p style={{ margin: 0, color: 'var(--text)', fontSize: '1rem', fontWeight: 600 }}>
-                                    📱 <strong>Vous recevrez un SMS</strong> dès que ce sera votre tour !
+                                    {t('status', 'sms_info_title')}
                                 </p>
                                 <p style={{ margin: '0.5rem 0 0 0', color: 'var(--text-light)', fontSize: '0.9rem' }}>
-                                    Vous pouvez fermer cette page en toute tranquillité.
+                                    {t('status', 'sms_info_desc')}
                                 </p>
                             </div>
                         </div>
@@ -117,9 +118,9 @@ export default function ClientStatus() {
                             <Bell size={80} style={{ color: 'var(--primary)', margin: '0 auto' }} />
                         </motion.div>
 
-                        <h1 style={{ fontSize: '2.8rem', marginBottom: '1rem', color: 'var(--text)' }}>C'est à vous ! 🎉</h1>
+                        <h1 style={{ fontSize: '2.8rem', marginBottom: '1rem', color: 'var(--text)' }}>{t('status', 'title_called')}</h1>
                         <p style={{ fontSize: '1.3rem', color: 'var(--text-light)', marginBottom: '2rem' }}>
-                            Le boucher vous attend au comptoir.
+                            {t('status', 'subtitle_called')}
                         </p>
 
                         <div style={{
@@ -131,10 +132,11 @@ export default function ClientStatus() {
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            gap: '12px'
+                            gap: '12px',
+                            flexDirection: isRTL ? 'row-reverse' : 'row'
                         }}>
                             <CheckCircle2 size={24} />
-                            <span style={{ fontWeight: 600 }}>C'est votre tour</span>
+                            <span style={{ fontWeight: 600 }}>{t('status', 'called_confirmation')}</span>
                         </div>
 
                         <hr style={{ border: 'none', borderTop: '1px solid #eee', marginBottom: '2.5rem' }} />
@@ -147,7 +149,7 @@ export default function ClientStatus() {
                         >
                             <p style={{ fontWeight: 600, marginBottom: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
                                 <Star size={20} fill="var(--primary)" color="var(--primary)" />
-                                Votre avis nous fait plaisir !
+                                {t('status', 'review_title')}
                                 <Star size={20} fill="var(--primary)" color="var(--primary)" />
                             </p>
 
@@ -156,16 +158,16 @@ export default function ClientStatus() {
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="btn btn-secondary"
-                                style={{ width: '100%', textDecoration: 'none', background: '#fff', border: '1px solid #eee', gap: '12px', padding: '1.2rem' }}
+                                style={{ width: '100%', textDecoration: 'none', background: '#fff', border: '1px solid #eee', gap: '12px', padding: '1.2rem', flexDirection: isRTL ? 'row-reverse' : 'row' }}
                             >
                                 <MessageSquareHeart size={20} color="var(--primary)" />
-                                Donner mon avis sur Google
+                                {t('status', 'review_btn')}
                                 <ExternalLink size={16} color="#999" />
                             </a>
 
-                            <div style={{ marginTop: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', color: '#999', fontSize: '0.85rem' }}>
+                            <div style={{ marginTop: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', color: '#999', fontSize: '0.85rem', flexDirection: isRTL ? 'row-reverse' : 'row' }}>
                                 <MapPin size={14} />
-                                Marché de Mo' - Toulouse
+                                {t('status', 'location')}
                             </div>
                         </motion.div>
                     </motion.div>
