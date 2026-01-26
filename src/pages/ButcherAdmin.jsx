@@ -46,10 +46,16 @@ export default function ButcherAdmin() {
             fetchHistory();
         });
 
+        // FALLBACK: Actualisation automatique toutes les 3 secondes
+        const pollingInterval = setInterval(() => {
+            fetchHistory();
+        }, 3000);
+
         return () => {
             socket.off('queue_updated');
             socket.off('client_called');
             socket.disconnect();
+            clearInterval(pollingInterval);
         };
     }, []);
 
