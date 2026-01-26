@@ -52,8 +52,14 @@ export default function Analytics() {
         let avgWait = 0;
         if (called.length > 0) {
             const totalWait = called.reduce((acc, q) => {
-                const start = new Date(q.timestamp);
-                const end = new Date(q.calledAt);
+                // Supporte les deux formats (mémoire vs SQL)
+                const created = q.created_at || q.timestamp;
+                const calledTime = q.called_at || q.calledAt;
+
+                if (!created || !calledTime) return acc;
+
+                const start = new Date(created);
+                const end = new Date(calledTime);
                 return acc + (end - start);
             }, 0);
             avgWait = Math.round(totalWait / called.length / 60000);
@@ -62,8 +68,11 @@ export default function Analytics() {
         // Données pour le graphique par heure
         const hoursData = Array.from({ length: 24 }, (_, i) => ({ hour: `${i}h`, clients: 0 }));
         history.forEach(q => {
-            const hour = new Date(q.timestamp).getHours();
-            hoursData[hour].clients += 1;
+            const created = q.created_at || q.timestamp;
+            if (created) {
+                const hour = new Date(created).getHours();
+                if (hoursData[hour]) hoursData[hour].clients += 1;
+            }
         });
 
         return { total, calledCount: called.length, avgWait, hoursData };
@@ -71,13 +80,18 @@ export default function Analytics() {
 
     // 3. Export Excel (Données chargées)
     const exportToExcel = () => {
-        const dataToExport = history.map(q => ({
-            ID: q.id,
-            Telephone: q.phone,
-            Statut: q.status === 'called' ? 'Appelé' : 'En attente',
-            Arrivee: new Date(q.timestamp).toLocaleString('fr-FR'),
-            Appele_a: q.calledAt ? new Date(q.calledAt).toLocaleString('fr-FR') : '-'
-        }));
+        const dataToExport = history.map(q => {
+            const created = q.created_at || q.timestamp;
+            const calledTime = q.called_at || q.calledAt;
+
+            return {
+                ID: q.id,
+                Telephone: q.phone,
+                Statut: q.status === 'called' ? 'Appelé' : 'En attente',
+                Arrivee: created ? new Date(created).toLocaleString('fr-FR') : '-',
+                Appele_a: calledTime ? new Date(calledTime).toLocaleString('fr-FR') : '-'
+            };
+        });
 
         const ws = XLSX.utils.json_to_sheet(dataToExport);
         const wb = XLSX.utils.book_new();
