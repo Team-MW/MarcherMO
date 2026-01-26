@@ -1,6 +1,7 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useQueue } from '../context/QueueContext';
 import { motion } from 'framer-motion';
+import axios from 'axios';
 import {
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
     AreaChart, Area
@@ -14,31 +15,38 @@ import * as XLSX from 'xlsx';
 export default function Analytics() {
     const { queue } = useQueue();
     const [filterRange, setFilterRange] = useState('all'); // 'today', '7d', '30d', 'all'
+    const [history, setHistory] = useState([]);
+    const [loading, setLoading] = useState(true);
 
-    // 1. Filtrage des données
-    const filteredQueue = useMemo(() => {
-        const now = new Date();
-        return queue.filter(q => {
-            const clientDate = new Date(q.timestamp);
-            if (filterRange === 'today') {
-                return clientDate.toDateString() === now.toDateString();
-            } else if (filterRange === '7d') {
-                const sevenDaysAgo = new Date();
-                sevenDaysAgo.setDate(now.getDate() - 7);
-                return clientDate >= sevenDaysAgo;
-            } else if (filterRange === '30d') {
-                const thirtyDaysAgo = new Date();
-                thirtyDaysAgo.setDate(now.getDate() - 30);
-                return clientDate >= thirtyDaysAgo;
+    // 1. Charger les données d'historique depuis l'API
+    useEffect(() => {
+        const fetchHistory = async () => {
+            setLoading(true);
+            try {
+                // Déterminer l'URL de base (Render en prod, localhost en dev)
+                const isLocal = window.location.hostname === 'localhost';
+                const BASE_URL = isLocal
+                    ? 'http://localhost:3001'
+                    : 'https://marchermo.onrender.com';
+
+                const response = await axios.get(`${BASE_URL}/api/history?filter=${filterRange}`);
+                setHistory(response.data);
+            } catch (error) {
+                console.error("Erreur chargement historique:", error);
+                setHistory([]);
+            } finally {
+                setLoading(false);
             }
-            return true; // 'all'
-        });
-    }, [queue, filterRange]);
+        };
 
-    // 2. Calcul des statistiques sur les données filtrées
+        fetchHistory();
+    }, [filterRange]); // Recharger quand le filtre change
+
+    // 2. Calcul des statistiques sur les données chargées (history)
     const stats = useMemo(() => {
-        const total = filteredQueue.length;
-        const called = filteredQueue.filter(q => q.status === 'called');
+        // history contient déjà les données filtrées par le backend
+        const total = history.length;
+        const called = history.filter(q => q.status === 'called');
 
         // Temps d'attente moyen (en minutes)
         let avgWait = 0;
@@ -51,19 +59,19 @@ export default function Analytics() {
             avgWait = Math.round(totalWait / called.length / 60000);
         }
 
-        // Données pour le graphique par heure (basé sur toutes les données filtrées)
+        // Données pour le graphique par heure
         const hoursData = Array.from({ length: 24 }, (_, i) => ({ hour: `${i}h`, clients: 0 }));
-        filteredQueue.forEach(q => {
+        history.forEach(q => {
             const hour = new Date(q.timestamp).getHours();
             hoursData[hour].clients += 1;
         });
 
         return { total, calledCount: called.length, avgWait, hoursData };
-    }, [filteredQueue]);
+    }, [history]);
 
-    // 3. Export Excel (Données filtrées)
+    // 3. Export Excel (Données chargées)
     const exportToExcel = () => {
-        const dataToExport = filteredQueue.map(q => ({
+        const dataToExport = history.map(q => ({
             ID: q.id,
             Telephone: q.phone,
             Statut: q.status === 'called' ? 'Appelé' : 'En attente',
@@ -83,6 +91,14 @@ export default function Analytics() {
         { id: '30d', label: "30 derniers jours" },
         { id: 'all', label: "Tout" },
     ];
+
+    if (loading) {
+        return (
+            <div className="container" style={{ display: 'flex', justifyContent: 'center', padding: '4rem' }}>
+                <p style={{ fontSize: '1.2rem', color: 'var(--text-light)' }}>Chargement des statistiques...</p>
+            </div>
+        );
+    }
 
     return (
         <div className="container" style={{ maxWidth: '1200px' }}>
