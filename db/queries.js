@@ -12,30 +12,44 @@ import { query } from './connection.js';
 /**
  * Générer le prochain numéro de ticket pour aujourd'hui
  */
+/**
+ * Générer le prochain numéro de ticket pour aujourd'hui
+ */
 export const generateTicketNumber = async () => {
-    const result = await query(
-        'SELECT COUNT(*) as count FROM clients WHERE DATE(created_at) = CURDATE()'
-    );
-    const nextNum = result[0].count + 1;
-    return `#${String(nextNum).padStart(4, '0')}`;
+    try {
+        const result = await query(
+            'SELECT COUNT(*) as count FROM clients WHERE DATE(created_at) = CURDATE()'
+        );
+        console.log('[DB] Count result:', result);
+        const nextNum = (result[0]?.count || 0) + 1;
+        const ticket = `#${String(nextNum).padStart(4, '0')}`;
+        console.log('[DB] Generated ticket:', ticket);
+        return ticket;
+    } catch (e) {
+        console.error('[DB] Error generating ticket:', e);
+        throw e;
+    }
 };
 
 /**
  * Ajouter un client à la file d'attente
  */
 export const joinQueue = async (phone) => {
+    console.log('[DB] Joining queue with phone:', phone);
     const ticketNumber = await generateTicketNumber();
 
     const result = await query(
         'INSERT INTO clients (ticket_number, phone, status) VALUES (?, ?, ?)',
         [ticketNumber, phone, 'waiting']
     );
+    console.log('[DB] Insert result:', result);
 
     // Récupérer le client créé
     const [client] = await query(
         'SELECT * FROM clients WHERE id = ?',
         [result.insertId]
     );
+    console.log('[DB] Created client:', client);
 
     return client;
 };
@@ -44,7 +58,7 @@ export const joinQueue = async (phone) => {
  * Récupérer toute la file d'attente
  */
 export const getQueue = async () => {
-    return await query(
+    const rows = await query(
         `SELECT 
       id,
       ticket_number,
@@ -57,6 +71,8 @@ export const getQueue = async () => {
     WHERE status = 'waiting'
     ORDER BY created_at ASC`
     );
+    console.log('[DB] Queue fetched, count:', rows.length);
+    return rows;
 };
 
 /**
