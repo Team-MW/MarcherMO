@@ -3,19 +3,15 @@
  * Utilise mysql2 avec support des Promises
  */
 
+import dotenv from 'dotenv';
 import mysql from 'mysql2/promise';
+
+// Charger les variables d'environnement
+dotenv.config();
 
 // Configuration du pool de connexions
 const pool = mysql.createPool({
-  uri: process.env.DATABASE_URL,
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0,
-  enableKeepAlive: true,
-  keepAliveInitialDelay: 0,
-  ssl: {
-    rejectUnauthorized: true
-  }
+  uri: process.env.DATABASE_URL
 });
 
 // Test de connexion au démarrage
@@ -44,7 +40,7 @@ export const query = async (sql, params) => {
 export const transaction = async (callback) => {
   const connection = await pool.getConnection();
   await connection.beginTransaction();
-  
+
   try {
     const result = await callback(connection);
     await connection.commit();
