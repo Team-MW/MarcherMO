@@ -94,7 +94,7 @@ export default function ClientHome() {
                         <div style={{ position: 'relative' }}>
                             <Phone size={20} style={{
                                 position: 'absolute',
-                                [isRTL ? 'right' : 'left']: '16px',
+                                left: '16px', // Force Left
                                 top: '50%',
                                 transform: 'translateY(-50%)',
                                 color: 'var(--text-light)'
@@ -106,10 +106,10 @@ export default function ClientHome() {
                                 value={phone}
                                 onChange={handlePhoneChange}
                                 style={{
-                                    paddingLeft: isRTL ? '1.5rem' : '3.2rem',
-                                    paddingRight: isRTL ? '3.2rem' : '1.5rem',
-                                    textAlign: isRTL ? 'right' : 'left',
-                                    direction: 'ltr' // Phones are always LTR
+                                    paddingLeft: '3.2rem', // Force Left padding for icon
+                                    paddingRight: '1.5rem',
+                                    textAlign: 'left', // Force Left alignment
+                                    direction: 'ltr' // Always LTR for phone numbers
                                 }}
                                 required
                             />
