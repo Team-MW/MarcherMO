@@ -101,8 +101,13 @@ export default function ScoreDisplay() {
             reconnection: true
         });
 
-        socket.on('client_called', refreshData);
         socket.on('queue_updated', refreshData);
+
+        // RECHARGEMENT FORCE
+        socket.on('reload_page', () => {
+            console.log("♻️ RELOAD RECEIVED");
+            window.location.reload();
+        });
 
         // Ecouter la demande de replay venant de l'admin
         socket.on('play_sound', () => {
@@ -110,8 +115,16 @@ export default function ScoreDisplay() {
             playNotificationSound();
         });
 
+        // AUTO-CLICK simule (Tentative d'activation son auto pour TV)
+        setTimeout(() => {
+            if (document.getElementById('start-overlay')) {
+                document.getElementById('start-overlay').click();
+            }
+        }, 2000);
+
         // Polling de sécurité
         const interval = setInterval(refreshData, 3000);
+
 
         // Appel initial
         refreshData();
@@ -135,6 +148,7 @@ export default function ScoreDisplay() {
             {/* OVERLAY INITIAL POUR ACTIVER LE SON */}
             {!soundEnabled && (
                 <div
+                    id="start-overlay"
                     onClick={enableSound}
                     style={{
                         position: 'absolute',

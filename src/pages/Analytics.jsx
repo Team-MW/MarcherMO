@@ -179,6 +179,34 @@ export default function Analytics() {
                     >
                         <TrendingUp size={20} style={{ transform: 'rotate(180deg)' }} /> Reset Journée
                     </button>
+
+                    {/* REFRESH ALL BUTTON */}
+                    <button
+                        onClick={async () => {
+                            if (window.confirm("Forcer le rafraîchissement de tous les écrans connectés ?")) {
+                                try {
+                                    const isLocal = window.location.hostname === 'localhost';
+                                    const BASE_URL = isLocal ? 'http://localhost:3001' : 'https://marchermo.onrender.com';
+                                    await axios.post(`${BASE_URL}/api/reload-all`);
+                                    alert("Ordre de rechargement envoyé !");
+                                } catch (e) {
+                                    console.error(e);
+                                    alert("Erreur lors de l'envoi");
+                                }
+                            }
+                        }}
+                        className="btn btn-secondary"
+                        style={{
+                            gap: '0.8rem',
+                            padding: '0.8rem 1.5rem',
+                            background: '#e0f2fe',
+                            color: '#0284c7',
+                            border: '1px solid #bae6fd'
+                        }}
+                        title="Recharge tous les écrans connectés (utile en cas de bug d'affichage)"
+                    >
+                        🔄 Reload TV
+                    </button>
                 </div>
             </div>
 

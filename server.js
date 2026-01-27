@@ -45,6 +45,15 @@ io.on('connection', (socket) => {
     });
 });
 
+/**
+ * POST /api/reload-all
+ * Force le rafraîchissement de TOUS les clients connectés
+ */
+app.post('/api/reload-all', (req, res) => {
+    io.emit('reload_page');
+    res.json({ message: "Ordre de rechargement envoyé à tous les clients" });
+});
+
 // =====================================================
 // ROUTES API AVEC BASE DE DONNÉES
 // =====================================================
