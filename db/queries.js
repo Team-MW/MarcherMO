@@ -38,6 +38,20 @@ export const joinQueue = async (phone) => {
     console.log('[DB] Joining queue with phone:', phone);
     const ticketNumber = await generateTicketNumber();
 
+    // Vérifier si le ticket existe déjà (conflit avec un jour précédent ?)
+    const existing = await query('SELECT id, created_at FROM clients WHERE ticket_number = ?', [ticketNumber]);
+
+    if (existing.length > 0) {
+        // Un ticket porte déjà ce numéro
+        const oldClient = existing[0];
+        // On vérifie si c'est aujourd'hui (ce qui serait un bug de count) ou avant
+        // Note: On assume que si ça existe, c'est vieux car le count du jour devrait être précis
+        console.warn(`[DB] Ticket ${ticketNumber} conflict detected with ID ${oldClient.id}. Archiving old ticket...`);
+
+        // On libère le ticket_number en renjmmant l'ancien avec son ID (unique et court)
+        await query('UPDATE clients SET ticket_number = CAST(id AS CHAR) WHERE id = ?', [oldClient.id]);
+    }
+
     const result = await query(
         'INSERT INTO clients (ticket_number, phone, status) VALUES (?, ?, ?)',
         [ticketNumber, phone, 'waiting']
@@ -68,7 +82,7 @@ export const getQueue = async () => {
       called_at,
       TIMESTAMPDIFF(MINUTE, created_at, NOW()) as wait_minutes
     FROM clients 
-    WHERE status = 'waiting'
+    WHERE status = 'waiting' AND DATE(created_at) = CURDATE()
     ORDER BY created_at ASC`
     );
     console.log('[DB] Queue fetched, count:', rows.length);
@@ -79,10 +93,10 @@ export const getQueue = async () => {
  * Appeler le prochain client dans la file
  */
 export const callNextClient = async () => {
-    // Récupérer le premier client en attente
+    // Récupérer le premier client en attente DE LA JOURNÉE
     const [firstClient] = await query(
         `SELECT id FROM clients 
-     WHERE status = 'waiting' 
+     WHERE status = 'waiting' AND DATE(created_at) = CURDATE()
      ORDER BY created_at ASC 
      LIMIT 1`
     );
