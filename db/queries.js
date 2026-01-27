@@ -17,8 +17,10 @@ import { query } from './connection.js';
  */
 export const generateTicketNumber = async () => {
     try {
+        // IMPORTANT: Utiliser UTC_DATE() pour être cohérent avec le stockage (souvent UTC)
+        // ou convertir explicitement si besoin. Ici on tente de compter les clients créés "aujourd'hui" selon la DB.
         const result = await query(
-            'SELECT COUNT(*) as count FROM clients WHERE DATE(created_at) = CURDATE()'
+            'SELECT COUNT(*) as count FROM clients WHERE DATE(created_at) = UTC_DATE()'
         );
         console.log('[DB] Count result:', result);
         const nextNum = (result[0]?.count || 0) + 1;
