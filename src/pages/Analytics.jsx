@@ -151,6 +151,34 @@ export default function Analytics() {
                     <button onClick={exportToExcel} className="btn btn-secondary" style={{ gap: '0.8rem', padding: '0.8rem 1.5rem' }}>
                         <FileSpreadsheet size={20} /> Exporter
                     </button>
+
+                    {/* HARD RESET BUTTON */}
+                    <button
+                        onClick={async () => {
+                            if (window.confirm("⚠️ DANGER : Voulez-vous vraiment effacer TOUTE la journée ?\n\n- Tous les clients d'aujourd'hui seront supprimés.\n- Le compteur de tickets repartira à #0001.\n- Les statistiques du jour seront perdues.\n\nCette action est irréversible !")) {
+                                try {
+                                    const isLocal = window.location.hostname === 'localhost';
+                                    const BASE_URL = isLocal ? 'http://localhost:3001' : 'https://marchermo.onrender.com';
+                                    await axios.post(`${BASE_URL}/api/queue/hard-reset`);
+                                    alert("Journée réinitialisée avec succès !");
+                                    window.location.reload();
+                                } catch (e) {
+                                    console.error(e);
+                                    alert("Erreur lors de la réinitialisation");
+                                }
+                            }
+                        }}
+                        className="btn"
+                        style={{
+                            gap: '0.8rem',
+                            padding: '0.8rem 1.5rem',
+                            background: '#fee2e2',
+                            color: '#dc2626',
+                            border: '1px solid #fecaca'
+                        }}
+                    >
+                        <TrendingUp size={20} style={{ transform: 'rotate(180deg)' }} /> Reset Journée
+                    </button>
                 </div>
             </div>
 

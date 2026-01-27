@@ -135,6 +135,18 @@ export const resetQueue = async () => {
 };
 
 /**
+ * HARD RESET: Supprimer TOUTES les données de la journée (UTC)
+ * Remet le compteur à 0 pour la journée en cours.
+ */
+export const hardResetToday = async () => {
+    const result = await query(
+        'DELETE FROM clients WHERE DATE(created_at) = UTC_DATE()'
+    );
+    console.log(`[DB] HARD RESET TODAY executed. Deleted ${result.affectedRows} rows.`);
+    return result.affectedRows;
+};
+
+/**
  * Annuler un client spécifique
  */
 export const cancelClient = async (ticketNumber) => {

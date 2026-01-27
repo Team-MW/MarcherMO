@@ -213,6 +213,33 @@ app.post('/api/queue/reset', async (req, res) => {
 });
 
 /**
+ * POST /api/queue/hard-reset
+ * SUPPRESSION TOTALE des données du jour (Remise à zéro compteur)
+ */
+app.post('/api/queue/hard-reset', async (req, res) => {
+    console.log('🔥 [API] HARD RESET TODAY requested!');
+    try {
+        const affectedRows = await db.hardResetToday();
+        console.log(`🔥 [API] Hard Reset done! ${affectedRows} rows deleted.`);
+
+        // Émettre la mise à jour massive
+        const queue = await db.getQueue(); // Devrait être vide
+        io.emit('queue_updated', queue);
+
+        // On peut aussi émettre un événement spécifique si besoin pour forcer le reload
+        io.emit('hard_reset_triggered');
+
+        res.json({
+            message: "Journée réinitialisée avec succès. Compteur remis à 0.",
+            affectedRows
+        });
+    } catch (error) {
+        console.error('❌ Erreur /api/queue/hard-reset:', error);
+        res.status(500).json({ error: 'Erreur serveur' });
+    }
+});
+
+/**
  * GET /api/stats
  * Récupérer les statistiques (optionnel - pour le dashboard admin)
  */
