@@ -90,17 +90,9 @@ app.get('/api/queue', async (req, res) => {
     try {
         const queue = await db.getQueue();
 
-        // Formater les données pour le frontend
-        const formattedQueue = queue.map(client => ({
-            id: client.id,
-            phone: client.phone,
-            status: client.status,
-            timestamp: client.created_at,
-            ticketNumber: client.ticket_number,
-            calledAt: client.called_at
-        }));
-
-        res.json(formattedQueue);
+        // Envoyer les données brutes (snake_case) pour être cohérent avec Socket.io
+        // et éviter les confusions ticket_number vs ticketNumber
+        res.json(queue);
     } catch (error) {
         console.error('❌ Erreur /api/queue:', error);
         res.status(500).json({ error: 'Erreur serveur' });
