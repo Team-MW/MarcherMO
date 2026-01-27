@@ -140,7 +140,7 @@ export default function ButcherAdmin() {
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                                             <div className="badge badge-waiting">{index + 1}</div>
                                             <div>
-                                                <div style={{ fontWeight: 700, fontSize: '1.1rem' }}>{client.ticket_number || `#${client.id}`}</div>
+                                                <div style={{ fontWeight: 800, fontSize: '1.5rem' }}>{client.ticket_number || `#${client.id}`}</div>
                                                 <div style={{ fontSize: '0.9rem', color: 'var(--text-light)' }}>
                                                     {client.phone}
                                                 </div>
@@ -182,7 +182,7 @@ export default function ButcherAdmin() {
                                         }}
                                     >
                                         <div>
-                                            <div style={{ fontWeight: 600, color: 'var(--text-light)' }}>{client.ticket_number || `#${client.id}`}</div>
+                                            <div style={{ fontWeight: 800, fontSize: '1.5rem' }}>{client.ticket_number || `#${client.id}`}</div>
                                             <div style={{ fontSize: '0.85rem', color: 'var(--text-light)', opacity: 0.8 }}>
                                                 {calledTime && new Date(calledTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                             </div>
