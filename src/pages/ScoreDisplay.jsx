@@ -56,7 +56,12 @@ export default function ScoreDisplay() {
 
             // 1. Chercher le dernier appelé
             const histRes = await axios.get(`${BASE_URL}/api/history?filter=today`);
-            const called = histRes.data.filter(q => q.status === 'called');
+            // On s'assure coté front aussi au cas où
+            const todayStr = new Date().toDateString();
+            const called = histRes.data.filter(q =>
+                q.status === 'called' &&
+                new Date(q.created_at || q.timestamp).toDateString() === todayStr
+            );
 
             if (called.length > 0) {
                 // Trier pour avoir le plus récent

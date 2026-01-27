@@ -12,8 +12,9 @@ export default function ButcherAdmin() {
     const [calledList, setCalledList] = useState([]);
     const [localWaitingList, setLocalWaitingList] = useState([]); // State local pour la file d'attente (fallback)
 
-    // On utilise la liste locale si elle est remplie, sinon celle du contexte
-    const waitingList = localWaitingList.length > 0 || calledList.length > 0 ? localWaitingList : queue.filter(q => q.status === 'waiting');
+    // On utilise principalement localWaitingList qui vient de l'API /queue
+    // L'API /queue est filtrée par date du jour (UTC_DATE), donc c'est la source de vérité
+    const waitingList = localWaitingList;
 
     // Fonction unifiée pour tout recharger depuis l'API
     const refreshAll = async () => {
