@@ -11,6 +11,7 @@ export default function ButcherAdmin() {
     const { queue, callNext } = useQueue(); // On garde accès aux fonctions du context
     const [calledList, setCalledList] = useState([]);
     const [localWaitingList, setLocalWaitingList] = useState([]); // State local pour la file d'attente (fallback)
+    const [isLoading, setIsLoading] = useState(false);
 
     // On utilise principalement localWaitingList qui vient de l'API /queue
     // L'API /queue est filtrée par date du jour (UTC_DATE), donc c'est la source de vérité
@@ -71,8 +72,18 @@ export default function ButcherAdmin() {
 
     // Fonction wrapper pour callNext qui rafraîchit tout après
     const handleCallNext = async () => {
-        await callNext();
-        setTimeout(refreshAll, 500);
+        if (isLoading) return;
+        setIsLoading(true);
+        try {
+            await callNext();
+            // Petit délai pour l'effet visuel et laisser le temps au serveur
+            await new Promise(resolve => setTimeout(resolve, 800));
+            await refreshAll();
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -96,18 +107,30 @@ export default function ButcherAdmin() {
                         <h3 style={{ marginBottom: '1.5rem', color: 'var(--text)' }}>Prochain Client</h3>
                         <button
                             onClick={handleCallNext}
-                            disabled={waitingList.length === 0}
+                            disabled={waitingList.length === 0 || isLoading}
                             className="btn btn-primary"
                             style={{
                                 width: '100%',
                                 padding: '1.5rem',
                                 fontSize: '1.25rem',
-                                opacity: waitingList.length === 0 ? 0.5 : 1,
-                                cursor: waitingList.length === 0 ? 'not-allowed' : 'pointer'
+                                opacity: waitingList.length === 0 || isLoading ? 0.5 : 1,
+                                cursor: waitingList.length === 0 || isLoading ? 'not-allowed' : 'pointer',
+                                display: 'flex',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                gap: '10px'
                             }}
                         >
-                            <Play size={24} fill="currentColor" style={{ marginRight: '8px' }} />
-                            {waitingList.length === 0 ? 'En attente de clients...' : 'APPELER LE PROCHAIN 🔔'}
+                            {isLoading ? (
+                                <>
+                                    <div className="spinner"></div> Appel en cours...
+                                </>
+                            ) : (
+                                <>
+                                    <Play size={24} fill="currentColor" />
+                                    {waitingList.length === 0 ? 'En attente de clients...' : 'APPELER LE PROCHAIN 🔔'}
+                                </>
+                            )}
                         </button>
                         <p style={{ marginTop: '1.5rem', color: 'var(--text-light)', fontWeight: '500' }}>
                             {waitingList.length} client(s) en attente 🕒
