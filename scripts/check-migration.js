@@ -54,7 +54,7 @@ async function checkDatabaseFiles() {
 
 // Vérification 2 : Variables d'environnement
 function checkEnvVariables() {
-    const required = ['DATABASE_URL', 'TWILIO_ACCOUNT_SID', 'TWILIO_AUTH_TOKEN', 'TWILIO_MESSAGING_SERVICE_SID'];
+    const required = ['DATABASE_URL', 'TWILIO_ACCOUNT_SID', 'TWILIO_AUTH_TOKEN'];
 
     for (const varName of required) {
         if (process.env[varName]) {
@@ -72,6 +72,13 @@ function checkEnvVariables() {
             log.error(`${varName} manquant dans .env`);
             allChecksPassed = false;
         }
+    }
+
+    if (process.env.TWILIO_MESSAGING_SERVICE_SID || process.env.TWILIO_PHONE_NUMBER) {
+        log.success('TWILIO_MESSAGING_SERVICE_SID ou TWILIO_PHONE_NUMBER configuré');
+    } else {
+        log.error('Au moins un de TWILIO_MESSAGING_SERVICE_SID ou TWILIO_PHONE_NUMBER doit être configuré');
+        allChecksPassed = false;
     }
 }
 

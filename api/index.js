@@ -114,11 +114,18 @@ app.post('/api/queue/call', async (req, res) => {
 
         // Envoyer le SMS
         try {
-            const message = await twilioClient.messages.create({
+            const messageParams = {
                 body: `C'est votre tour au Marché MO ! (Ticket ${calledClient.ticket_number}). Veuillez vous présenter au comptoir.`,
-                messagingServiceSid: process.env.TWILIO_MESSAGING_SERVICE_SID,
                 to: formattedPhone
-            });
+            };
+
+            if (process.env.TWILIO_MESSAGING_SERVICE_SID) {
+                messageParams.messagingServiceSid = process.env.TWILIO_MESSAGING_SERVICE_SID;
+            } else if (process.env.TWILIO_PHONE_NUMBER) {
+                messageParams.from = process.env.TWILIO_PHONE_NUMBER;
+            }
+
+            const message = await twilioClient.messages.create(messageParams);
 
             console.log(`✅ SMS envoyé à ${formattedPhone}`);
 
