@@ -249,12 +249,12 @@ export default function ScoreDisplay() {
                 <div style={{ position: 'absolute', bottom: '2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '5px' }}>
                     <h2 style={{ fontSize: '1.5vw', color: 'var(--primary)', opacity: 0.8, margin: 0 }}>MARCHÉ MO 🥩</h2>
                     <a href="https://microdidact.com" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', color: 'var(--text-light)', fontSize: '0.8vw', opacity: 0.6 }}>
-                        Réalisé par <strong>MICRODIDACT</strong>
+                        Réalisé par <strong>MICRODIDACCC</strong>
                     </a>
                 </div>
             </div>
 
-            {/* DROITE : LISTE D'ATTENTE */}
+            {/* DROITE : LISTE Dff'ATTENTE */}
             <div style={{
                 background: '#fafafa',
                 padding: '2rem',
