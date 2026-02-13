@@ -14,14 +14,23 @@ export default function ClientHome() {
 
     const handlePhoneChange = (e) => {
         let value = e.target.value;
+        // Supprimer les espaces pour éviter les erreurs de longueur
+        value = value.replace(/\s/g, '');
+
         const isArabic = language === 'ar';
 
-        // Basic phone formatting logic
+        // Logique de formatage
         if (!isArabic && !value.startsWith('+33')) {
-            // Keep +33 for non-arabic if user prefers (though general logic can be improved)
-            // For simplicity let's stick to the existing logic but respect user input more if they clear it
-            if (value.length < 3) value = '+33'; // Prevent deleting prefix easily
+            if (value.length < 3) value = '+33'; // Empêcher de supprimer le préfixe
         }
+
+        // Limite de caractères stricte
+        if (value.startsWith('+33') && value.length > 12) {
+            return; // Bloquer l'ajout si > 12 caractères (+33 + 9 chiffres)
+        } else if (value.length > 15) {
+            return; // Limite générique de sécurité
+        }
+
         setPhone(value);
     };
 
@@ -35,7 +44,7 @@ export default function ClientHome() {
     return (
         <div className="container">
             {/* Language Selector */}
-            <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', marginBottom: '2rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
                 {[
                     { code: 'fr', flag: '🇫🇷', label: 'Français' },
                     { code: 'en', flag: '🇬🇧', label: 'English' },
@@ -45,15 +54,15 @@ export default function ClientHome() {
                         key={lang.code}
                         onClick={() => setLanguage(lang.code)}
                         style={{
-                            fontSize: '2rem',
+                            fontSize: '1.5rem',
                             background: language === lang.code ? 'white' : 'rgba(255,255,255,0.4)',
                             border: language === lang.code ? '2px solid var(--primary)' : '1px solid transparent',
-                            borderRadius: '16px',
+                            borderRadius: '12px',
                             cursor: 'pointer',
-                            padding: '0.8rem',
+                            padding: '0.4rem',
                             transition: 'all 0.2s',
-                            width: '80px',
-                            height: '80px',
+                            width: '45px',
+                            height: '45px',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
@@ -73,15 +82,15 @@ export default function ClientHome() {
                 className="glass-card"
                 style={{ maxWidth: '500px', margin: '0 auto' }}
             >
-                <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
-                    <img src={carteHandicap} alt="Marché MO" style={{ height: '120px', marginBottom: '1rem' }} />
+                <div style={{ textAlign: 'center', marginBottom: '1rem' }}>
+                    <img src={carteHandicap} alt="Marché MO" style={{ height: '80px', marginBottom: '0.5rem' }} />
                 </div>
 
-                <div style={{ background: '#f5f5f5', padding: '1.5rem', borderRadius: '12px', marginBottom: '2rem', textAlign: isRTL ? 'right' : 'left' }}>
-                    <h3 style={{ fontSize: '1.2rem', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '8px', flexDirection: isRTL ? 'row-reverse' : 'row' }}>
+                <div style={{ background: '#f5f5f5', padding: '1rem', borderRadius: '12px', marginBottom: '1rem', textAlign: isRTL ? 'right' : 'left' }}>
+                    <h3 style={{ fontSize: '1.2rem', marginBottom: '0.2rem', display: 'flex', alignItems: 'center', gap: '8px', flexDirection: isRTL ? 'row-reverse' : 'row' }}>
                         {t('home', 'instruction_title')}
                     </h3>
-                    <p style={{ color: 'var(--text-light)', fontSize: '0.95rem', lineHeight: '1.5' }}>
+                    <p style={{ color: 'var(--text-light)', fontSize: '0.95rem', lineHeight: '1.5', margin: 0 }}>
                         {t('home', 'instruction_desc')}
                     </p>
                 </div>
