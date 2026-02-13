@@ -4,12 +4,14 @@ import { Bell, List, Users } from 'lucide-react';
 import axios from 'axios';
 import { io } from 'socket.io-client';
 import notificationSound from '../assets/son.mp3';
+import carteHandicap from '../assets/carteandicaper.png';
 
 // VARIABLE GLOBALE (Hors React) : L'arme ultime anti-répétition
 let globalLastPlayTime = 0;
 
 export default function ScoreDisplay() {
     const [lastCalled, setLastCalled] = useState(null);
+    const [lastCalledHistory, setLastCalledHistory] = useState([]);
     const [waitingList, setWaitingList] = useState([]);
     const [isNewCall, setIsNewCall] = useState(false);
     const [soundEnabled, setSoundEnabled] = useState(false);
@@ -71,6 +73,9 @@ export default function ScoreDisplay() {
                     return new Date(dateA) - new Date(dateB);
                 });
                 const latest = called[called.length - 1];
+                const history = called.slice(Math.max(0, called.length - 4), called.length - 1).reverse();
+
+                setLastCalledHistory(history);
 
                 setLastCalled(prev => {
                     // Si c'est un nouveau client (ID différent), on déclenche l'animation et le son
@@ -196,12 +201,12 @@ export default function ScoreDisplay() {
                             style={{ textAlign: 'center' }}
                         >
                             <p style={{
-                                fontSize: '3vw',
+                                fontSize: '4vw',
                                 fontWeight: 700,
                                 color: 'var(--text-light)',
                                 textTransform: 'uppercase',
                                 letterSpacing: '0.2rem',
-                                marginBottom: '2rem'
+                                marginBottom: '1rem'
                             }}>
                                 C'est votre tour 👋
                             </p>
@@ -216,7 +221,7 @@ export default function ScoreDisplay() {
                                 display: 'inline-block'
                             }}>
                                 <span style={{
-                                    fontSize: '15vw',
+                                    fontSize: '18vw',
                                     fontWeight: 900,
                                     lineHeight: 1,
                                     fontFamily: 'Outfit, sans-serif'
@@ -231,25 +236,50 @@ export default function ScoreDisplay() {
                                     animate={{ opacity: 1, y: 0 }}
                                     style={{ marginTop: '3rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1rem' }}
                                 >
-                                    <Bell size={40} color="var(--primary)" className="floating" />
-                                    <span style={{ fontSize: '2vw', fontWeight: 700, color: 'var(--primary)' }}>
-                                        Veuillez avancer au comptoir
-                                    </span>
+                                </motion.div>
+                            )}
+
+                            {/* HISTORIQUE DES 4 DERNIERS APPELS */}
+                            {lastCalledHistory.length > 0 && (
+                                <motion.div
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    style={{
+                                        marginTop: '4vh',
+                                        display: 'flex',
+                                        gap: '2vw',
+                                        justifyContent: 'center',
+                                        flexWrap: 'wrap'
+                                    }}
+                                >
+                                    {lastCalledHistory.map((h) => (
+                                        <div key={h.id} style={{
+                                            background: '#000',
+                                            padding: '1.5vw 3vw',
+                                            borderRadius: '20px',
+                                            opacity: 0.8,
+                                            boxShadow: '0 10px 30px rgba(0,0,0,0.1)'
+                                        }}>
+                                            <span style={{ fontSize: '4vw', fontWeight: 800, color: '#fff' }}>
+                                                {h.ticket_number || h.ticketNumber || `#${h.id}`}
+                                            </span>
+                                        </div>
+                                    ))}
                                 </motion.div>
                             )}
                         </motion.div>
                     ) : (
                         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                            <h1 style={{ fontSize: '4vw', color: '#e5e5e5' }}>En attente... 🕖</h1>
+                            <h1 style={{ fontSize: '6vw', color: '#e5e5e5' }}>En attente... 🕖</h1>
                         </motion.div>
                     )}
                 </AnimatePresence>
 
                 {/* Footer Logo */}
-                <div style={{ position: 'absolute', bottom: '2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '5px' }}>
-                    <h2 style={{ fontSize: '1.5vw', color: 'var(--primary)', opacity: 0.8, margin: 0 }}>MARCHÉ MO 🥩</h2>
-                    <a href="https://microdidact.com" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', color: 'var(--text-light)', fontSize: '0.8vw', opacity: 0.6 }}>
-                        Réalisé par <strong>MICRODIDACCC</strong>
+                <div style={{ marginTop: 'auto', paddingTop: '2rem', paddingBottom: '2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '5px' }}>
+                    <img src={carteHandicap} alt="Carte Prioritaire" style={{ height: '10vh', marginBottom: '1vh', opacity: 0.9 }} />
+                    <a href="https://microdidact.com" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', color: 'var(--text-light)', fontSize: '0.6vw', opacity: 0.5 }}>
+                        Réalisé par <strong>microdidact</strong>
                     </a>
                 </div>
             </div>
@@ -271,7 +301,7 @@ export default function ScoreDisplay() {
                     borderBottom: '2px solid rgba(0,0,0,0.05)'
                 }}>
                     <Users size={32} color="var(--text)" />
-                    <h2 style={{ margin: 0, fontSize: '2vw', color: 'var(--text)' }}>À SUIVRE 📋</h2>
+                    <h2 style={{ margin: 0, fontSize: '4vw', color: 'var(--text)' }}>À SUIVRE 📋</h2>
                 </div>
 
                 <div style={{ overflowY: 'auto', flex: 1, paddingRight: '1rem' }}>
@@ -296,15 +326,15 @@ export default function ScoreDisplay() {
                                         border: '1px solid rgba(0,0,0,0.05)'
                                     }}
                                 >
-                                    <span style={{ fontSize: '2.5vw', fontWeight: 800, color: 'var(--primary)' }}>
-                                        {client.ticket_number || `#${client.id}`}
+                                    <span style={{ fontSize: '5vw', fontWeight: 800, color: 'var(--primary)' }}>
+                                        {client.ticket_number || client.ticketNumber || `#${client.id}`}
                                     </span>
                                     <span style={{
                                         background: '#f4f4f5',
                                         color: '#52525b',
                                         padding: '0.4rem 0.8rem',
                                         borderRadius: '12px',
-                                        fontSize: '1.2vw',
+                                        fontSize: '2vw',
                                         fontWeight: 700
                                     }}>
                                         {index + 1}
@@ -312,7 +342,7 @@ export default function ScoreDisplay() {
                                 </motion.div>
                             ))
                         ) : (
-                            <p style={{ textAlign: 'center', color: '#a1a1aa', fontSize: '1.5vw', marginTop: '4rem' }}>
+                            <p style={{ textAlign: 'center', color: '#a1a1aa', fontSize: '2.5vw', marginTop: '4rem' }}>
                                 Personne en attente
                             </p>
                         )}
@@ -320,7 +350,7 @@ export default function ScoreDisplay() {
                 </div>
 
                 {waitingList.length > 8 && (
-                    <div style={{ textAlign: 'center', marginTop: '1rem', color: '#71717a', fontSize: '1.2vw' }}>
+                    <div style={{ textAlign: 'center', marginTop: '1rem', color: '#71717a', fontSize: '2vw' }}>
                         Et {waitingList.length - 8} autres...
                     </div>
                 )}

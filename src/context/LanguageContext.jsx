@@ -22,7 +22,7 @@ export const translations = {
             next_label: "Vous êtes le prochain !",
             realtime_label: "Actualisation en temps réel",
             sms_info_title: "📱 Notification SMS active",
-            sms_info_desc: "Vous recevrez un SMS quand ce sera votre tour. Vous pouvez vaquer à vos occupations.",
+            sms_info_desc: "Vous recevrez un message et votre numéro de ticket va s'afficher sur la télé.",
             title_called: "C'est à vous ! 🎉",
             subtitle_called: "Le boucher vous attend au comptoir.",
             called_confirmation: "C'est votre tour",

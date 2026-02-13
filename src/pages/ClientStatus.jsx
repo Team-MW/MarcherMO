@@ -56,7 +56,7 @@ export default function ClientStatus() {
                             </p>
                             <hr style={{ border: 'none', borderTop: '1px solid #eee', marginBottom: '1rem' }} />
                             <p style={{ textTransform: 'uppercase', letterSpacing: '0.1em', fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-light)', marginBottom: '0.5rem' }}>
-                                {t('status', 'position_label')}
+                                {positionsAhead === 0 ? t('status', 'ticket_label') : t('status', 'position_label')}
                             </p>
                             <motion.span
                                 key={positionsAhead}
@@ -64,7 +64,7 @@ export default function ClientStatus() {
                                 animate={{ scale: 1, opacity: 1 }}
                                 style={{ fontSize: '4.5rem', fontWeight: 800, color: 'var(--text)', display: 'block', lineHeight: 1 }}
                             >
-                                {positionsAhead === 0 ? t('status', 'soon') : positionsAhead}
+                                {positionsAhead === 0 ? myQueueInfo?.ticket_number : positionsAhead}
                             </motion.span>
                             <p style={{ color: 'var(--text-light)', marginTop: '0.5rem' }}>
                                 {positionsAhead > 0 ? `${positionsAhead} ${t('status', 'persons_ahead')}` : t('status', 'next_label')}

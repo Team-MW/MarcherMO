@@ -40,6 +40,9 @@ export default function DisplayQR() {
                         <QrCode size={16} style={{ verticalAlign: 'middle', marginRight: '4px' }} />
                         Le système vous alertera par notification
                     </div>
+                    <div style={{ marginTop: '1rem', fontSize: '0.8rem', color: '#999', opacity: 0.8, fontStyle: 'italic' }}>
+                        🔒 Aucune donnée n'est enregistrée
+                    </div>
                 </div>
             </motion.div>
         </div>

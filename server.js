@@ -133,7 +133,7 @@ app.post('/api/queue/call', async (req, res) => {
         // Envoyer le SMS
         try {
             const messageParams = {
-                body: `C'est votre tour au Marché MO ! (Ticket ${calledClient.ticket_number}). Veuillez vous présenter au comptoir.`,
+                body: `C’est votre tour ! Votre boucher vous attend 🔥🥩 (Ticket ${calledClient.ticket_number})`,
                 to: formattedPhone
             };
 
@@ -151,7 +151,7 @@ app.post('/api/queue/call', async (req, res) => {
             await db.logSMS(
                 calledClient.id,
                 formattedPhone,
-                `C'est votre tour au Marché MO ! (Ticket ${calledClient.ticket_number}). Veuillez vous présenter au comptoir.`,
+                `C’est votre tour ! Votre boucher vous attend 🔥🥩 (Ticket ${calledClient.ticket_number})`,
                 message.sid,
                 'sent'
             );
@@ -162,7 +162,7 @@ app.post('/api/queue/call', async (req, res) => {
             await db.logSMS(
                 calledClient.id,
                 formattedPhone,
-                `C'est votre tour au Marché MO ! (Ticket ${calledClient.ticket_number}). Veuillez vous présenter au comptoir.`,
+                `C’est votre tour ! Votre boucher vous attend 🔥🥩 (Ticket ${calledClient.ticket_number})`,
                 null,
                 'failed',
                 twilioError.message

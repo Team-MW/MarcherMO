@@ -84,7 +84,7 @@ export const getQueue = async () => {
       called_at,
       TIMESTAMPDIFF(MINUTE, created_at, NOW()) as wait_minutes
     FROM clients 
-    WHERE status = 'waiting' AND DATE(created_at) = CURDATE()
+    WHERE status = 'waiting' AND DATE(created_at) = UTC_DATE()
     ORDER BY created_at ASC`
     );
     console.log('[DB] Queue fetched, count:', rows.length);
@@ -98,7 +98,7 @@ export const callNextClient = async () => {
     // Récupérer le premier client en attente DE LA JOURNÉE
     const [firstClient] = await query(
         `SELECT id FROM clients 
-     WHERE status = 'waiting' AND DATE(created_at) = CURDATE()
+     WHERE status = 'waiting' AND DATE(created_at) = UTC_DATE()
      ORDER BY created_at ASC 
      LIMIT 1`
     );
@@ -171,7 +171,7 @@ export const getStats = async (filterRange = 'today') => {
 
     switch (filterRange) {
         case 'today':
-            dateFilter = 'WHERE DATE(created_at) = CURDATE()';
+            dateFilter = 'WHERE DATE(created_at) = UTC_DATE()';
             break;
         case '7days':
             dateFilter = 'WHERE created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)';
@@ -208,7 +208,7 @@ export const getHistory = async (filterRange = 'today') => {
 
     switch (filterRange) {
         case 'today':
-            dateFilter = 'WHERE DATE(created_at) = CURDATE()';
+            dateFilter = 'WHERE DATE(created_at) = UTC_DATE()';
             break;
         case '7days':
             dateFilter = 'WHERE created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)';
@@ -248,7 +248,7 @@ export const getHourlyData = async (filterRange = 'today') => {
 
     switch (filterRange) {
         case 'today':
-            dateFilter = 'WHERE DATE(created_at) = CURDATE()';
+            dateFilter = 'WHERE DATE(created_at) = UTC_DATE()';
             break;
         case '7days':
             dateFilter = 'WHERE created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)';
