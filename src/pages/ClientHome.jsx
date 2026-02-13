@@ -4,6 +4,7 @@ import { useQueue } from '../context/QueueContext';
 import { useLanguage } from '../context/LanguageContext';
 import { motion } from 'framer-motion';
 import { Phone, ArrowRight, Globe } from 'lucide-react';
+import carteHandicap from '../assets/carteandicaper.png';
 
 export default function ClientHome() {
     const [phone, setPhone] = useState('+33');
@@ -73,8 +74,7 @@ export default function ClientHome() {
                 style={{ maxWidth: '500px', margin: '0 auto' }}
             >
                 <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
-                    <h1 style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>{t('home', 'title')}</h1>
-                    <p style={{ color: 'var(--text-light)', fontSize: '1.1rem' }}>{t('home', 'subtitle')}</p>
+                    <img src={carteHandicap} alt="Marché MO" style={{ height: '120px', marginBottom: '1rem' }} />
                 </div>
 
                 <div style={{ background: '#f5f5f5', padding: '1.5rem', borderRadius: '12px', marginBottom: '2rem', textAlign: isRTL ? 'right' : 'left' }}>

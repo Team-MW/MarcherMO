@@ -212,7 +212,7 @@ export default function ScoreDisplay() {
                             </p>
 
                             <div style={{
-                                background: 'var(--primary)',
+                                background: '#B43532',
                                 color: '#fff',
                                 padding: '3vw 6vw',
                                 borderRadius: '40px',
@@ -254,7 +254,7 @@ export default function ScoreDisplay() {
                                 >
                                     {lastCalledHistory.map((h) => (
                                         <div key={h.id} style={{
-                                            background: '#000',
+                                            background: '#B43532',
                                             padding: '1.5vw 3vw',
                                             borderRadius: '20px',
                                             opacity: 0.8,
