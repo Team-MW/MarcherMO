@@ -51,10 +51,7 @@ export default function ClientStatus() {
                             marginBottom: '2rem',
                             border: '1px solid #f0f0f0'
                         }}>
-                            <p style={{ textTransform: 'uppercase', letterSpacing: '0.1em', fontSize: '0.8rem', fontWeight: 700, color: 'var(--text)', marginBottom: '1rem' }}>
-                                {t('status', 'ticket_label')} : <span style={{ color: 'var(--primary)', fontSize: '1.2rem' }}>{myQueueInfo?.ticket_number}</span>
-                            </p>
-                            <hr style={{ border: 'none', borderTop: '1px solid #eee', marginBottom: '1rem' }} />
+
                             <p style={{ textTransform: 'uppercase', letterSpacing: '0.1em', fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-light)', marginBottom: '0.5rem' }}>
                                 {positionsAhead === 0 ? t('status', 'ticket_label') : t('status', 'position_label')}
                             </p>

@@ -14,21 +14,31 @@ export default function ClientHome() {
 
     const handlePhoneChange = (e) => {
         let value = e.target.value;
-        // Supprimer les espaces pour éviter les erreurs de longueur
+        // Supprimer les espaces
         value = value.replace(/\s/g, '');
 
         const isArabic = language === 'ar';
 
-        // Logique de formatage
-        if (!isArabic && !value.startsWith('+33')) {
-            if (value.length < 3) value = '+33'; // Empêcher de supprimer le préfixe
+        // Logique de formatage améliorée
+        if (!isArabic) {
+            // On force +33 sauf si l'utilisateur commence par 0 (format local)
+            if (!value.startsWith('+33') && !value.startsWith('0')) {
+                if (value.length < 3) value = '+33';
+            }
         }
 
-        // Limite de caractères stricte
-        if (value.startsWith('+33') && value.length > 12) {
-            return; // Bloquer l'ajout si > 12 caractères (+33 + 9 chiffres)
+        // Limites strictes
+        if (value.startsWith('0')) {
+            // Format local fr (ex: 0612345678) -> 10 chiffres
+            if (value.length > 10) return;
+        } else if (value.startsWith('+330')) {
+            // Cas spécifique demandé : si +33 suivi de 0 -> blocage à 11
+            if (value.length > 11) return;
+        } else if (value.startsWith('+33')) {
+            // Format international correct (ex: +33612345678) -> 12 chars
+            if (value.length > 12) return;
         } else if (value.length > 15) {
-            return; // Limite générique de sécurité
+            return;
         }
 
         setPhone(value);
