@@ -21,6 +21,11 @@ export default function ClientHome() {
 
         // Logique de formatage améliorée
         if (!isArabic) {
+            // Correction automatique : Si l'utilisateur tape +330..., on enlève le 0
+            if (value.startsWith('+330')) {
+                value = '+33' + value.substring(4);
+            }
+
             // On force +33 sauf si l'utilisateur commence par 0 (format local)
             if (!value.startsWith('+33') && !value.startsWith('0')) {
                 if (value.length < 3) value = '+33';
@@ -31,9 +36,6 @@ export default function ClientHome() {
         if (value.startsWith('0')) {
             // Format local fr (ex: 0612345678) -> 10 chiffres
             if (value.length > 10) return;
-        } else if (value.startsWith('+330')) {
-            // Cas spécifique demandé : si +33 suivi de 0 -> blocage à 11
-            if (value.length > 11) return;
         } else if (value.startsWith('+33')) {
             // Format international correct (ex: +33612345678) -> 12 chars
             if (value.length > 12) return;
