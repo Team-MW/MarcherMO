@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQueue } from '../context/QueueContext';
 import { useLanguage } from '../context/LanguageContext';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Phone, ArrowRight, Globe } from 'lucide-react';
 import carteHandicap from '../assets/carteandicaper.png';
 
@@ -42,6 +42,20 @@ export default function ClientHome() {
         }
 
         setPhone(value);
+    };
+
+    const [showGDPR, setShowGDPR] = useState(false);
+
+    useState(() => {
+        const consented = localStorage.getItem('gdpr_consent');
+        if (!consented) {
+            setShowGDPR(true);
+        }
+    }, []);
+
+    const handleAcceptGDPR = () => {
+        localStorage.setItem('gdpr_consent', 'true');
+        setShowGDPR(false);
     };
 
     const handleSubmit = (e) => {
@@ -145,6 +159,56 @@ export default function ClientHome() {
                     {t('home', 'notification_text')}
                 </p>
             </motion.div>
+
+            <AnimatePresence>
+                {showGDPR && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        style={{
+                            position: 'fixed',
+                            top: 0,
+                            left: 0,
+                            width: '100%',
+                            height: '100%',
+                            background: 'rgba(0,0,0,0.6)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            zIndex: 9999,
+                            padding: '1rem'
+                        }}
+                    >
+                        <motion.div
+                            initial={{ scale: 0.9, y: 20 }}
+                            animate={{ scale: 1, y: 0 }}
+                            exit={{ scale: 0.9, y: 20 }}
+                            style={{
+                                background: 'white',
+                                padding: '2rem',
+                                borderRadius: '24px',
+                                maxWidth: '90%',
+                                width: '400px',
+                                textAlign: 'center',
+                                boxShadow: '0 10px 40px rgba(0,0,0,0.2)'
+                            }}
+                        >
+                            <h2 style={{ fontSize: '1.4rem', marginBottom: '1rem', color: 'var(--primary)' }}>Données Personnelles 🔒</h2>
+                            <p style={{ color: 'var(--text-light)', lineHeight: '1.6', marginBottom: '2rem' }}>
+                                Vos informations sont utilisées uniquement pour gérer votre place dans la file d'attente. Elles sont automatiquement effacées de notre système à la fin de la journée. Aucune donnée n'est conservée ni utilisée à des fins commerciales.
+                            </p>
+                            <button
+                                onClick={handleAcceptGDPR}
+                                className="btn btn-primary"
+                                style={{ width: '100%', padding: '1rem' }}
+                            >
+                                J'ai compris
+                            </button>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }
